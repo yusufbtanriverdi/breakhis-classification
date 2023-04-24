@@ -6,6 +6,7 @@
 
 ## TODO List
 
+- List of preprocessing methods.
 - List feature extraction methods listed in [1] and find approriate libraries with some examples. We may need to reproduce them.
 - List machine learning baseline models that we will have to use. These are mentioned in slides as:
     - Dynamic selection of classifiers,
@@ -13,9 +14,11 @@
     - RF
     - Ensemble across magnification factors 
     - Rejection scheme.
-- List deep learning models that we will have to use. I find RetinaNet useful for now.
+- List deep learning models that we will have to use. RetinaNet requires box annotations. We do not have that. But we may still use Focal Loss which is useful in imbalanced datasets.
 - Capsulate these methods in this repository.
 - Then we will start processing images.
+- List metric methods that we can use.
+- Visualization applications.
 
 ### References
 
