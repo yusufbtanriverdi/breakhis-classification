@@ -12,4 +12,3 @@ if __name__ == "__main__":
 
     modelWhole = resnet18()
     print(modelWhole)
-    print("I am hadeel")
