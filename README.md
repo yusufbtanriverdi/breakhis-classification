@@ -1,3 +1,13 @@
+## Installation
+
+- Install git for your OS.
+
+- Run `git clone https://github.com/yusuftengriverdi/breast_histopathology_clf.git`
+
+- Create a new virtual environment with latest python, activate it and run `pip install -r requirements.txt` in terminal.
+
+- You are good to go.
+
 ## Done
 
 - Stacking images (from one magnification factor) as torch dataset and training them with our current deep learning is doable. However, I need extra memory:
