@@ -1,3 +1,13 @@
+## Done
+
+- Stacking images (from one magnification factor) as torch dataset and training them with our current deep learning is doable. However, I need extra memory:
+
+`Allocator: not enough memory: you tried to allocate 82182144 bytes.`
+
+I will ask professor to give us cloud access.
+
+- We can try with lighter DL models for prior results or train with smaller images.
+
 ## Some highlights
 
 - [1] states *"...A comprehensive set of experiments shows that accuracy rates with this baseline system range from 80% to 85%, depending on the image magnification factor. ..."*. Our primary goal is **to exceed %85** in worst case scenario. It is also stated that they use some feature extraction methods. Let's list them here and we can use them for our models.
