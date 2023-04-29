@@ -128,7 +128,7 @@ class RetinaNet(nn.Module):
         classes = [self.subnet_classes(feature) for feature in features]
         classes = torch.cat(classes, 1)
         classes = torch.mean(classes, dim=1)
-        return torch.tensor(classes)
+        return classes
 
 
 if __name__ == '__main__':
