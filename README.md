@@ -2,7 +2,7 @@
 
 - Install git for your OS.
 
-- Run `git clone https:\\github.com\yusuftengriverdi\breast_histopathology_clf`
+- Run `git clone https://github.com/yusuftengriverdi/breast_histopathology_clf.git`
 
 - Create a new virtual environment with latest python, activate it and run `pip install -r requirements.txt` in terminal.
 
