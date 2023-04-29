@@ -6,8 +6,8 @@ import torch.nn.functional as F
 
 from torch.autograd import Variable
 
-from resnet import resnet50_features
-from utilities.layers import conv1x1, conv3x3
+from .resnet import resnet50_features
+from .utilities.layers import conv1x1, conv3x3
 import numpy as  np
 
 # Source: https://github.com/c0nn3r/RetinaNet/blob/master/resnet_features.py 

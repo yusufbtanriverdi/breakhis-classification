@@ -14,7 +14,7 @@
     - RF
     - Ensemble across magnification factors 
     - Rejection scheme.
-- List deep learning models that we will have to use. RetinaNet requires box annotations. We do not have that. But we may still use Focal Loss which is useful in imbalanced datasets.
+- List deep learning models that we will have to use. RetinaNet requires box annotations. We do not have that. But we may still use Focal Loss or Pyramid Net which is useful in imbalanced datasets.
 - Capsulate these methods in this repository.
 - Then we will start processing images.
 - List metric methods that we can use.
