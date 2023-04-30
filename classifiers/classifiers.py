@@ -9,7 +9,7 @@ sys.path.append(parent_dir)
 
 from tools import read_images, binary_paths
 from .stack import prepare_data
-import .metrics as m
+from  .metrics import auc
 
 # TODO: Try with MNIST
 # You can try to list parameters of classifier here.
@@ -26,8 +26,8 @@ def eval_classifiers(train_X, train_y, test_X, test_y):
         test_yhat = clf.predict(test_y)
 
     # Use sklearn metrics AUC.
-    train_performance = m.auc(train_y, train_yhat)
-    test_performance = m.auc(test_y, test_yhat)
+    train_performance = auc(train_y, train_yhat)
+    test_performance = auc(test_y, test_yhat)
     # You can create a table with pandas.
 
     return  train_performance, test_performance
