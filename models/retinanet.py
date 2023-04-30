@@ -136,30 +136,6 @@ if __name__ == '__main__':
     import torchvision.datasets as dset
 
     net = RetinaNet(num_classes=10)
-    """ RANDOM EXAMPLE:
-        x = Variable(torch.rand(1, 3, 500, 500))
-
-        now = time.time()
-        predictions = net(x)
-        later = time.time()
-
-        print(later - now)
-
-        print("------------------------------------------------------------------------------------")
-        print("Input:")
-        print(x.shape)
-        print("Example vector:", x[0][0])
-        
-        print("------------------------------------------------------------------------------------")
-        print("Regression subnet produces the position of anchors.")
-        print(predictions[0].size())
-        print("Example vector:", predictions[0][0])
-        
-        print("------------------------------------------------------------------------------------")
-        print("Class subnet produces the position of anchors.")
-        print(predictions[1].size())
-        print("Example vector:", predictions[1][0])"""
-    
     # For first time downloading.
     # cifar10 = dset.CIFAR10("data/cifar10/", download=True)
     cifar10 = dset.CIFAR10("data/cifar10/", download=False)
