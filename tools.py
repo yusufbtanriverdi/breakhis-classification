@@ -1,4 +1,4 @@
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 import numpy as np
 
 import cv2
@@ -34,6 +34,13 @@ def read_images(path_arr, label):
             resized_images.append((resized_img, label))
 
     return resized_images
+
+def binary_paths(root, mf):
+    benign = root + f'benign\\*\\*\\*\\{mf}\\*.png'
+    malign = root + f'malignant\\*\\*\\*\\{mf}\\*.png'
+
+    return glob.glob(benign), glob.glob(malign)
+
 
 def make_weights_for_balanced_classes(pairs, nclasses):  
     # Source: https://discuss.pytorch.org/t/balanced-sampling-between-classes-with-torchvision-dataloader/2703/3                       
@@ -71,11 +78,10 @@ class BreaKHis(Dataset):
         
         if mode == 'binary':
             self.nclasses = 2
-            benign = root + f'benign\\*\\*\\*\\{mf}\\*.png'
-            malign = root + f'malignant\\*\\*\\*\\{mf}\\*.png'
+            paths = binary_paths(root, mf)
             
-            benign_stack = read_images(glob.glob(benign), 0)
-            malign_stack = read_images(glob.glob(malign), 1)
+            benign_stack = read_images(paths[0], 0)
+            malign_stack = read_images(paths[1], 1)
 
             pairs = np.concatenate([benign_stack, malign_stack])
             
