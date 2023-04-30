@@ -1,3 +1,23 @@
+## Installation
+
+- Install git for your OS.
+
+- Run `git clone https://github.com/yusuftengriverdi/breast_histopathology_clf.git`
+
+- Create a new virtual environment with latest python, activate it and run `pip install -r requirements.txt` in terminal.
+
+- You are good to go.
+
+## Done
+
+- Stacking images (from one magnification factor) as torch dataset and training them with our current deep learning is doable. However, I need extra memory:
+
+`Allocator: not enough memory: you tried to allocate 82182144 bytes.`
+
+I will ask professor to give us cloud access.
+
+- We can try with lighter DL models for prior results or train with smaller images.
+
 ## Some highlights
 
 - [1] states *"...A comprehensive set of experiments shows that accuracy rates with this baseline system range from 80% to 85%, depending on the image magnification factor. ..."*. Our primary goal is **to exceed %85** in worst case scenario. It is also stated that they use some feature extraction methods. Let's list them here and we can use them for our models.
@@ -14,7 +34,7 @@
     - RF
     - Ensemble across magnification factors 
     - Rejection scheme.
-- List deep learning models that we will have to use. RetinaNet requires box annotations. We do not have that. But we may still use Focal Loss which is useful in imbalanced datasets.
+- List deep learning models that we will have to use. RetinaNet requires box annotations. We do not have that. But we may still use Focal Loss or Pyramid Net which is useful in imbalanced datasets.
 - Capsulate these methods in this repository.
 - Then we will start processing images.
 - List metric methods that we can use.
