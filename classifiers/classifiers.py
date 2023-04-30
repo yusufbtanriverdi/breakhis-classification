@@ -1,6 +1,15 @@
+import sys
+import os
+# Get the parent directory path
+parent_dir = os.path.abspath(os.path.join(os.getcwd(), "."))
+# Add the parent directory to the Python path
+sys.path.append(parent_dir)
+# print(sys.path)
+# Now we can import the tools module
+
 from tools import read_images, binary_paths
-from classifiers.stack import prepare_data
-import classifiers.metrics as m
+from .stack import prepare_data
+import .metrics as m
 
 # TODO: Try with MNIST
 # You can try to list parameters of classifier here.
