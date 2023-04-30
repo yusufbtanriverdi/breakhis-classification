@@ -16,8 +16,11 @@ def eval_classifiers(train_X, train_y, test_X, test_y):
         # You can apply CV.
         test_yhat = clf.predict(test_y)
 
+    # Use sklearn metrics AUC.
     train_performance = m.auc(train_y, train_yhat)
     test_performance = m.auc(test_y, test_yhat)
+    # You can create a table with pandas.
+
     return  train_performance, test_performance
 
 if __name__ == "__main__":
