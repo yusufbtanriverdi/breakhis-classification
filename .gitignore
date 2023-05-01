@@ -4,6 +4,8 @@
 */*/__pycache__
 /data
 /notebooks/MNIST
+notebooks\cifar-10-python.tar.gz
+datasets\cifar
 <<<<<<< HEAD
 /notebooks/CIFAR10
 =======
