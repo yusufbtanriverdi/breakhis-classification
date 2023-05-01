@@ -1,4 +1,3 @@
-import torch.utils.model_zoo as model_zoo
 from torchvision.models.resnet import BasicBlock, Bottleneck, ResNet
 
 # Source: https://github.com/c0nn3r/RetinaNet/blob/master/resnet_features.py 
