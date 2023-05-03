@@ -3,7 +3,6 @@
 from skimage.segmentation import slic
 from skimage.segmentation import mark_boundaries
 from skimage.util import img_as_float
-import argparse
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt

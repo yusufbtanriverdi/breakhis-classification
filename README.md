@@ -14,9 +14,12 @@
 
 `Allocator: not enough memory: you tried to allocate 82182144 bytes.`
 
-I will ask professor to give us cloud access.
+- Feature extraction methods are almost done!!! For cnn models, we need to decide and define layer indices for each model. 
 
-- We can try with lighter DL models for prior results or train with smaller images.
+- I start to inspect superpixel features as it would be lighter than fixel features. 
+
+- Pytorch built-in models are ready to use but we have to implement normalization process unique to our data.
+
 
 ## Some highlights
 
@@ -24,19 +27,17 @@ I will ask professor to give us cloud access.
 
 - We may seperately look into magnification factors classification. See Table 2 in [1]
 
+- We can try with lighter DL models for prior results or train with smaller images.
+
+
 ## TODO List
 
+- See issues for details. 
 - List of preprocessing methods.
-- List feature extraction methods listed in [1] and find approriate libraries with some examples. We may need to reproduce them.
-- List machine learning baseline models that we will have to use. These are mentioned in slides as:
-    - Dynamic selection of classifiers,
-    - SVM
-    - RF
-    - Ensemble across magnification factors 
-    - Rejection scheme.
-- List deep learning models that we will have to use. RetinaNet requires box annotations. We do not have that. But we may still use Focal Loss or Pyramid Net which is useful in imbalanced datasets.
-- Capsulate these methods in this repository.
-- Then we will start processing images.
+- ~~List feature extraction methods listed in [1] and find approriate libraries with some examples. We may need to reproduce them.~~
+- List machine learning baseline models that we will have to use. These are mentioned in slides and in issues.
+- ~~List deep learning models that we will have to use. RetinaNet requires box annotations. We do not have that.But we may still use Focal Loss or Pyramid Net which is useful in imbalanced datasets.~~ 
+- Then we will start processing images (train, test, eval, feature extraction, etc.)
 - List metric methods that we can use.
 - Visualization applications.
 
