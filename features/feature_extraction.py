@@ -1,6 +1,9 @@
 from extractors.lbp import LocalBinaryPatterns
+from extractors.glcm import GLCM
+from extractors.orb import ORB
 import numpy as np
 
+extractors = [LocalBinaryPatterns,GLCM,ORB]
 
 def save_features(X):
     pass
