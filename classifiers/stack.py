@@ -18,6 +18,8 @@ def np_one_hot_encoder(y):
     v[np.arange(y.size), y] = 1
     return v
 
+def read_features(feature_extractor, imgs, root='./features/all/'):
+    pass
 
 def read_data(root, mf, mode = 'binary', shuffle= True):
     stacks = []
@@ -32,8 +34,12 @@ def read_data(root, mf, mode = 'binary', shuffle= True):
         np.random.shuffle(stacks)
     return stacks
 
-def stack_data(stacks, transforms=None, features=None):
+def stack_data(stacks, transforms=None, features=None, mode='extract'):
     """Stack different classes, apply transforms and features. """
+
+    if mode not in ['extract', 'get']:
+        raise ValueError
+    
     # TODO: Concat stacks first
     num_samples = len(stacks)
     num_features = len(features)
@@ -46,8 +52,10 @@ def stack_data(stacks, transforms=None, features=None):
     X = np.empty(shape=(num_samples, num_features), dtype=np.float128)
     
     for i, feature_extractor in enumerate(features):
-        X[:, i] = feature_extractor(imgs)
-
+        if mode == 'extract':
+            X[:, i] = feature_extractor(imgs)
+        else:
+            X[:, i] = read_features(feature_extractor, imgs)
     return X, y
 
 def split_data(X, y, one_hot_vector=False, test_size=0.3):
