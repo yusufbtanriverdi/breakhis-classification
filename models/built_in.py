@@ -5,10 +5,10 @@ from tools import BreaKHis
 
 # from torch hub...
 
-def normalize_data_for_buitin(X, y):
+def normalize_data_for_buitin(root='D:\\BreaKHis_v1\\', mf='40X', mode='binary'):
 
     transform = T.Compose([T.Resize(256), T.CenterCrop(224), T.ToTensor()])
-    dataset = BreaKHis(transform=transform)
+    dataset = BreaKHis(root=root, mf=mf, mode=mode, transform=transform)
 
     means = []
     stds = []
