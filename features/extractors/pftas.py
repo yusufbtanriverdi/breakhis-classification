@@ -1,68 +1,46 @@
-  # TAS gives original parameters, unlike PFTAS which gives a variation without any hardcoded parameters.
-  # In order to do this we will use mahotas.features.tas method
-  # Syntax : mahotas.features.tas(img)
-  # Argument : It takes image object as argument
-  # Return : It returns 1-D array 
-
-  # Note: Input image should be filtered or should be loaded as gray
-  # In order to filter the image we will take the image object which is numpy.
+import cv2
 import numpy as np
 from skimage.filters import threshold_otsu
-import mahotas as mh
-import mahotas.thresholding as mht
+import matplotlib.pyplot as plt
 
 class PFTAS:
-    def __init__(self, thresh_ranges):
-        self.thresh_ranges = thresh_ranges
-    
+    def __init__(self):
+        pass
+
     def describe(self, image):
-        # Compute the Otsu threshold value
-        mu = mh.otsu(image)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        # Compute the standard deviation of pixels above the threshold
-        sigma = np.std(image[image > mu])
+        # Compute Otsu's threshold
+        thresh = threshold_otsu(gray)
 
-        # Binarize the image using the specified threshold ranges
-        binary_images = [mh.binary_range(image, mu + sigma, mu - sigma),
-                         mh.binary_range(image, mu - sigma, 255),
-                         mh.binary_range(image, mu, 255)]
+        # Binarize the image using multiple thresholds
+        binary1 = cv2.threshold(gray, thresh, 255, cv2.THRESH_BINARY)[1]
+        binary2 = cv2.threshold(gray, thresh - np.std(gray[gray > thresh]), 255, cv2.THRESH_BINARY)[1]
+        binary3 = cv2.threshold(gray, thresh + np.std(gray[gray < thresh]), 255, cv2.THRESH_BINARY_INV)[1]
 
-        # Compute the PFTAS features for each channel
+        # Compute normalized histograms for each thresholded image
+        histograms = []
+        for binary in [binary1, binary2, binary3]:
+            hist, _ = np.histogram(binary, bins=9, range=(0, 256))
+            hist = hist.astype('float')
+            hist /= (hist.sum() + 1e-7)
+            histograms.append(hist)
+
+        # Concatenate histograms for each RGB channel
         features = []
-        for channel in range(3):
-            channel_feats = []
-            for binary_image in binary_images:
-                # Compute the adjacency matrix
-                adj_matrix = mh.labeled.adjacency(binary_image, connectivity=8)
+        for channel in cv2.split(image):
+            for hist in histograms:
+                features.extend(hist)
+        features = np.array(features)
 
-                # Compute the histogram of white pixels with i white neighbors
-                hist = np.bincount(adj_matrix[binary_image > 0], minlength=9)
+        # Convert features array to np.uint8 and concatenate the feature vector with its bitwise negated version
+        features = np.concatenate([features.astype(np.uint8), np.bitwise_not(features.astype(np.uint8))])
 
-                # Normalize the histogram
-                norm_hist = hist / np.sum(hist)
+        return features
 
-                # Append the histogram to the channel feature vector
-                channel_feats.extend(norm_hist[1:])
-
-            # Concatenate the channel feature vectors
-            features.extend(channel_feats)
-
-        # Concatenate the feature vector and its bitwise negated version
-        feature_vector = np.concatenate([features, ~np.array(features)])
-
-        return feature_vector
-    
-    def get_feature(self, image):
-        return np.array(self.describe(image), dtype=np.float64)
-
-import cv2
-
-if __name__ == "__main__":
-    image = cv2.imread('/path/to/image.png')
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    pftas = PFTAS([(mu + sigma, mu - sigma), (mu - sigma, 255), (mu, 255)])
-    feature_vector = pftas.get_feature(gray)
-    print("PFTAS feature vector:", feature_vector)
-
-
+if __name__ == '__main__':
+    pftas = PFTAS()
+    image = cv2.imread('/Users/melikapooyan/Downloads/BreaKHis_v1/breast/benign/SOB/adenosis/SOB_B_A_14-22549AB/40X/SOB_B_A-14-22549AB-40-005.png')
+    features = pftas.describe(image)
+    print(features)
 
