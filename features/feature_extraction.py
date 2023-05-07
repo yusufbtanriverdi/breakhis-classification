@@ -9,7 +9,7 @@ from extractors.lbp import LocalBinaryPatterns
 # from extractors.hos import HOS
 import numpy as np
 import pandas as pd
-
+from tqdm import tqdm
 import sys
 import os
 # Get the parent directory path
@@ -41,19 +41,31 @@ def extract_features(stacks, extractors=None, save=True, filename="features.csv"
     y = np.array(stacks)[:, 1]
     # Get images.
     imgs = np.array(stacks)[:, 0]
+
+    # Get filenames
+    fnames = np.array(stacks)[:, 2]
     # Initialize feature matrix.
-    X = np.empty(shape=(num_samples, num_features), dtype=np.float64)
+    X = []
+
+    for j in tqdm(range(len(imgs))):
+        tmp = []
+        for i, feature_extractor in enumerate(extractors):
+            tmp.append(feature_extractor.describe(imgs[j]))
+        X.append(np.array(tmp, dtype=np.float64))
+    if save:
+        save_features(X, fnames, filename=filename)
+    return X, y
+
     
-    for i, feature_extractor in enumerate(extractors):
-        X[:, i] = feature_extractor(imgs)
-    
-def save_features(X, filename):
+def save_features(X, fnames, filename):
     """Save the extracted features to a CSV file using Pandas."""
-    df = pd.DataFrame(X)
+    dicto = {"image": fnames[0], "lbp": X}
+    df = pd.DataFrame.from_dict(dicto)
+    print(df)
     df.to_csv(filename, index=False)
 
 if __name__ == "__main__":
     extractors = [LocalBinaryPatterns(numPoints=8, radius=1)]
 
     stack  = read_data(root='D:\\BreaKHis_v1\\', mf='40X', mode='binary')
-    X, y = extract_features(stack, extractors=extractors, save=True, filename='features.csv')
+    X, y = extract_features(stack, extractors=extractors, save=True, filename='features/all/lbp.csv')

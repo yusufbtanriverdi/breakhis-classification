@@ -32,13 +32,13 @@ def read_images(path_arr, label):
             resized_img = cv2.resize(img, (456, 700))
             
             # Add resized image to list or array
-            resized_images.append((resized_img, label))
+            resized_images.append((resized_img, label, filename))
 
     return resized_images
 
 def binary_paths(root, mf):
-    benign = root + f'benign\\*\\*\\*\\{mf}\\*.png'
-    malign = root + f'malignant\\*\\*\\*\\{mf}\\*.png'
+    benign = root + f'benign/*/*/*/{mf}/*.png'
+    malign = root + f'malignant/*/*/*{mf}/*.png'
     return glob.glob(benign), glob.glob(malign)
 
 
