@@ -20,6 +20,7 @@ sys.path.append(parent_dir)
 # Now we can import the tools module
 
 from tools import BreaKHis
+from classifiers.stack import read_data
 from torchvision import transforms
 
 extractors = [LocalBinaryPatterns, GLCM, ORB, LPQ, PFTAS, CNN_extractor, FOS, HOG, HOS]
@@ -41,7 +42,7 @@ def extract_features(stacks, extractors=None, save=True, filename="features.csv"
     # Get images.
     imgs = np.array(stacks)[:, 0]
     # Initialize feature matrix.
-    X = np.empty(shape=(num_samples, num_features), dtype=np.float128)
+    X = np.empty(shape=(num_samples, num_features), dtype=np.float64)
     
     for i, feature_extractor in enumerate(extractors):
         X[:, i] = feature_extractor(imgs)
@@ -54,9 +55,5 @@ def save_features(X, filename):
 if __name__ == "__main__":
     extractors = [LocalBinaryPatterns,GLCM,ORB,LPQ,PFTAS,CNN_extractor,FOS,HOG,HOS]
 
-    myDataset = BreaKHis(
-                transform=transforms.Compose([
-                        transforms.ToTensor(),
-                    ]))
-    stacks = [1 ,2 ,3]
-    X, y = extract_features(stacks, extractors=extractors, save=True, filename='features.csv')
+    stack  = read_data(root='D:\\BreaKHis_v1\\', mf='40X', mode='binary')
+    X, y = extract_features(stack, extractors=extractors, save=True, filename='features.csv')

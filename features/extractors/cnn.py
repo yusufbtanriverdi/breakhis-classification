@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import torchvision.models as models
 import cv2 as cv
 
-model_name_to_layer_inds = {'resnet18': (0, -1)}
-
+model_name_to_layer_inds = {'resnet18': (0, -1),
+                            'resnet52': (0, -1)}
 
 class CNN_extractor():
     def __init__(self, pretrained_model, model_name = 'resnet18', layer_inds=None, mode='name'):

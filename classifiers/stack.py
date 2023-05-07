@@ -3,7 +3,7 @@ from sklearn.model_selection import train_test_split
 
 import sys
 import os
-
+from tqdm import tqdm
 # Get the parent directory path
 parent_dir = os.path.abspath(os.path.join(os.getcwd(), "."))
 # Add the parent directory to the Python path
@@ -22,17 +22,15 @@ def read_features(feature_extractor, imgs, root='./features/all/'):
     pass
 
 def read_data(root, mf, mode = 'binary', shuffle= True):
-    stacks = []
     if mode == 'binary':
         paths = binary_paths(root, mf)
-        for i, path in enumerate(paths):
-            stack = read_images(path, i)
-            stacks.append(stack)
+        stack_0 = read_images(paths[0], 0)
+        stack_1 = read_images(paths[1], 1)
     
-    stacks = np.array(stacks, dtype=np.uint8)
+    stack = np.concatenate([stack_0, stack_1])
     if shuffle:
-        np.random.shuffle(stacks)
-    return stacks
+        np.random.shuffle(stack)
+    return stack
 
 def stack_data(stacks, transforms=None, features=None, mode='extract'):
     """Stack different classes, apply transforms and features. """

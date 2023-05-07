@@ -3,6 +3,7 @@ import numpy as np
 
 import cv2
 import glob
+from tqdm import tqdm 
 
 def read_images(path_arr, label):
     # Initialize variables
@@ -11,7 +12,7 @@ def read_images(path_arr, label):
     resized_images = []
 
     # Iterate through all image files in directory
-    for filename in path_arr:
+    for filename in tqdm(path_arr):
         if filename.endswith('.png'): # or any other image format
             # Read image
             img = cv2.imread(filename)
