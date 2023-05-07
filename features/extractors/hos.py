@@ -17,7 +17,7 @@ Li X, Hu H, Xiao D, Wang D, Jiang S. Analysis of the spatial distribution of col
 """Correlation can also be used to compare different parts of the same image, such as in texture analysis, 
 where the correlation between adjacent pixels is used to describe the texture of the image."""
 
-from glcm import GLCM
+from extractors.glcm import GLCM
 import numpy as np
 from skimage.filters.rank import entropy
 from skimage.color import rgb2hsv, rgb2gray, rgb2yuv

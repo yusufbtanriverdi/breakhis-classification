@@ -49,5 +49,5 @@ if __name__ == "__main__":
     
     # Display results
     print(features)
-    plt.imshow(image, cmap='gray')
+   #plt.imshow(image, cmap='gray')
 
