@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-class PFTAS:
+class CLBP:
     def __init__(self, thresholds):
         self.thresholds = thresholds
         
@@ -25,6 +25,6 @@ if __name__ == "__main__":
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     mu = np.mean(gray)
     sigma = np.std(gray)
-    pftas = PFTAS([(mu + sigma, mu - sigma), (mu - sigma, 255), (mu, 255)])
+    pftas = CLBP([(mu + sigma, mu - sigma), (mu - sigma, 255), (mu, 255)])
     feature_vector = pftas.describe(gray)
     print("PFTAS feature vector:", feature_vector)
