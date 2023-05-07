@@ -1,12 +1,12 @@
 from extractors.lbp import LocalBinaryPatterns
-from extractors.glcm import GLCM
-from extractors.orb import ORB
-from extractors.lpq import LPQ
-from extractors.pftas import PFTAS
-from extractors.cnn import CNN_extractor
-from extractors.fos import FOS
-from extractors.hog import HOG
-from extractors.hos import HOS
+# from extractors.glcm import GLCM
+# from extractors.orb import ORB
+# from extractors.lpq import LPQ
+# from extractors.pftas import PFTAS
+# from extractors.cnn import CNN_extractor
+# from extractors.fos import FOS
+# from extractors.hog import HOG
+# from extractors.hos import HOS
 import numpy as np
 import pandas as pd
 
@@ -19,11 +19,11 @@ sys.path.append(parent_dir)
 # print(sys.path)
 # Now we can import the tools module
 
-from tools import BreaKHis
+
 from classifiers.stack import read_data
 from torchvision import transforms
 
-extractors = [LocalBinaryPatterns, GLCM, ORB, LPQ, PFTAS, CNN_extractor, FOS, HOG, HOS]
+extractors = [LocalBinaryPatterns]
 
 def save_features(X, filename):
     """Save the extracted features to a CSV file using Pandas."""
@@ -53,7 +53,7 @@ def save_features(X, filename):
     df.to_csv(filename, index=False)
 
 if __name__ == "__main__":
-    extractors = [LocalBinaryPatterns,GLCM,ORB,LPQ,PFTAS,CNN_extractor,FOS,HOG,HOS]
+    extractors = [LocalBinaryPatterns(numPoints=8, radius=1)]
 
     stack  = read_data(root='D:\\BreaKHis_v1\\', mf='40X', mode='binary')
     X, y = extract_features(stack, extractors=extractors, save=True, filename='features.csv')

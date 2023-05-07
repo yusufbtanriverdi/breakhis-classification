@@ -24,6 +24,7 @@ def read_features(feature_extractor, imgs, root='./features/all/'):
 def read_data(root, mf, mode = 'binary', shuffle= True):
     if mode == 'binary':
         paths = binary_paths(root, mf)
+        print(paths[0])
         stack_0 = read_images(paths[0], 0)
         stack_1 = read_images(paths[1], 1)
     
