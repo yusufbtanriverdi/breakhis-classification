@@ -24,6 +24,7 @@ class GLCM:
         if np.max(image) >= self.levels:
             factor = np.ceil(np.max(image) / self.levels)
             image = (image / factor).astype(np.uint8)
+            #gray= cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 
         # Compute gray-level co-occurrence matrices
         graycom = graycomatrix(image, self.distances, self.angles, levels=self.levels, symmetric=True, normed=True)
@@ -37,8 +38,6 @@ class GLCM:
 
         return np.array(features)
     
-    def __str__(self):
-        return 'glcm'
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
@@ -47,7 +46,7 @@ if __name__ == "__main__":
     image = cv2.imread('/Users/melikapooyan/Downloads/BreaKHis_v1/breast/benign/SOB/adenosis/SOB_B_A_14-22549AB/40X/SOB_B_A-14-22549AB-40-003.png', cv2.IMREAD_GRAYSCALE)
 
     # Compute GLCM features
-    desc = GLCM([1], [0, np.pi/4, np.pi/2, 3*np.pi/4], levels=8)
+    desc = GLCM(distances=1, angles=[0, np.pi/4, np.pi/2, 3*np.pi/4], levels=8)
     features = desc.describe(image)
     
     # Display results

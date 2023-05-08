@@ -38,7 +38,7 @@ def read_images(path_arr, label):
 
 def binary_paths(root, mf):
     benign = root + f'benign/*/*/*/{mf}/*.png'
-    malign = root + f'malignant/*/*/*{mf}/*.png'
+    malign = root + f'malignant/*/*/*/{mf}/*.png'
     return glob.glob(benign), glob.glob(malign)
 
 

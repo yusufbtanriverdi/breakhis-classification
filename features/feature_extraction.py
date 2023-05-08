@@ -1,5 +1,5 @@
-from extractors.lbp import LocalBinaryPatterns
-# from extractors.glcm import GLCM
+#from extractors.lbp import LocalBinaryPatterns
+from extractors.glcm import GLCM
 # from extractors.orb import ORB
 # from extractors.lpq import LPQ
 # from extractors.pftas import PFTAS
@@ -23,7 +23,7 @@ sys.path.append(parent_dir)
 from classifiers.stack import read_data
 from torchvision import transforms
 
-extractors = [LocalBinaryPatterns]
+extractors = [GLCM]
 
 def save_features(X, filename):
     """Save the extracted features to a CSV file using Pandas."""
@@ -62,14 +62,13 @@ def extract_features(stacks, extractors=None, save=True, feature_dir="features/a
     
 def save_features(X, fnames, filename):
     """Save the extracted features to a CSV file using Pandas."""
-    dicto = {"image": fnames[0], "lbp": X}
+    dicto = {"image": fnames[0], "glcm": X}
     df = pd.DataFrame.from_dict(dicto)
     print(df)
     df.to_csv(filename, index=False)
 
 if __name__ == "__main__":
-    extractors = [LocalBinaryPatterns(numPoints=8, radius=1)]
+    extractors = [GLCM(distances=1, angles=(0, np.pi/4, np.pi/2, 3*np.pi/4), levels=8)]
 
-    stack  = read_data(root='D:\\BreaKHis_v1\\', mf='40X', mode='binary', shuffle=False)
-    mf = '40X'
-    X, y = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/')
+    stack  = read_data(root='/Users/melikapooyan/Downloads/BreaKHis_v1/breast/', mf='40X', mode='binary',shuffle='off')
+    X, y = extract_features(stack, extractors=extractors, save=True, filename='features/all/lbp.csv')
