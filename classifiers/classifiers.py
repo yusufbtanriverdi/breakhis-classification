@@ -8,16 +8,13 @@ sys.path.append(parent_dir)
 # Now we can import the tools module
 
 from tools import read_images, binary_paths
-from .stack import prepare_data, read_data, read_features
-from  .metrics import auc
+from stack import read_data, read_features
 
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
-from sklearn.datasets import make_moons, make_circles, make_classification
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
@@ -105,5 +102,7 @@ def eval_classifiers(train_X, train_y, test_X, test_y):
 if __name__ == "__main__":
     # Use here to test MNIST or other dataset.
     extractors = ['lbp']
-    fnames, X, y = read_features(extractors, root='./features/all/', mode='binary', mf='40X')
+    fnames, X, y = read_features(extractors, root='features/all/', mode='binary', mf='40X')
+
+    print(len(fnames), len(X), len(y))
     pass

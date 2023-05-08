@@ -24,10 +24,10 @@ def read_features(extractors, root='./features/all/', mode='binary', mf='40X'):
     basedir = root + mode + '/' + mf + '/'
     X = []
     for extractor in extractors:
-        featuredir = basedir + str(extractor)
+        featuredir = basedir + str(extractor) + '.csv'
         csv = pd.read_csv(featuredir)
-        X.append(csv[1])
-    return [csv[0], X, csv[-1]]
+        X.append(csv[str(extractor)])
+    return [csv['image'], X, csv['label']]
 
 
 def read_data(root, mf, mode = 'binary', shuffle= True):

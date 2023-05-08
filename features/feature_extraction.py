@@ -1,4 +1,4 @@
-#from extractors.lbp import LocalBinaryPatterns
+from extractors.lbp import LocalBinaryPatterns
 from extractors.glcm import GLCM
 # from extractors.orb import ORB
 # from extractors.lpq import LPQ
@@ -68,7 +68,13 @@ def save_features(X, fnames, filename):
     df.to_csv(filename, index=False)
 
 if __name__ == "__main__":
-    extractors = [GLCM(distances=1, angles=(0, np.pi/4, np.pi/2, 3*np.pi/4), levels=8)]
+    extractors = [LocalBinaryPatterns(numPoints=8, radius=1)]
 
-    stack  = read_data(root='/Users/melikapooyan/Downloads/BreaKHis_v1/breast/', mf='40X', mode='binary',shuffle='off')
-    X, y = extract_features(stack, extractors=extractors, save=True, filename='features/all/lbp.csv')
+    stack  = read_data(root='D:/BreaKHis_v1/', mf='40X', mode='binary',shuffle='off')
+    if len(stack) == 0:
+        print("Please change data dir!!")
+        raise IndexError
+    
+    mf = '40X'
+    fnames, X, y = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}')
+    
