@@ -23,6 +23,12 @@ def np_one_hot_encoder(y):
 def read_features(extractors, root='./features/all/', mode='binary', mf='40X'):
     basedir = root + mode + '/' + mf + '/'
     X = []
+    if len(extractors) == 1:
+        featuredir = basedir + str(extractors[0]) + '.csv'
+        csv = pd.read_csv(featuredir)
+        return [csv['image'], csv[str(extractors[0])], csv['label']]
+    
+
     for extractor in extractors:
         featuredir = basedir + str(extractor) + '.csv'
         csv = pd.read_csv(featuredir)

@@ -56,21 +56,20 @@ def extract_features(stacks, extractors=None, save=True, feature_dir="features/a
             X_with_y = X.copy()
             X_with_y.append(y)
             filename = feature_dir + str(feature_extractor)
-            save_features(X_with_y, fnames, filename=filename)
-    return X, y
+            save_features(X_with_y, fnames, title = str(feature_extractor), filename=filename)
+    return fnames, X, y
 
     
-def save_features(X, fnames, filename):
+def save_features(X, fnames, title, filename):
     """Save the extracted features to a CSV file using Pandas."""
-    dicto = {"image": fnames[0], "glcm": X}
+    dicto = {"image": fnames, title: X, 'label': y}
     df = pd.DataFrame.from_dict(dicto)
-    print(df)
     df.to_csv(filename, index=False)
 
 if __name__ == "__main__":
     extractors = [LocalBinaryPatterns(numPoints=8, radius=1)]
 
-    stack  = read_data(root='D:/BreaKHis_v1/', mf='40X', mode='binary',shuffle='off')
+    stack  = read_data(root='D:/BreaKHis_v1/', mf='40X', mode='binary',shuffle=False)
     if len(stack) == 0:
         print("Please change data dir!!")
         raise IndexError
