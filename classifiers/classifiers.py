@@ -26,6 +26,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.inspection import DecisionBoundaryDisplay
 from sklearn.metrics import accuracy_score, roc_auc_score, average_precision_score, mean_absolute_percentage_error, top_k_accuracy_score, f1_score, r2_score
+import pandas as pd
 
 """# TODO: Try with MNIST
 # You can try to list parameters of classifier here.
@@ -49,13 +50,6 @@ def eval_classifiers(train_X, train_y, test_X, test_y):
     return  train_performance, test_performance
 """
 
-def convert_int_list(arr):
-    for i, s in enumerate(arr):
-        s = s[1:-1]
-        print(s)
-        arr[i] = list(map(np.float64, s.split(' ')))
-    return arr
-
 # TODO: Try with MNIST
 # You can try to list parameters of classifier here.
 def eval_classifiers(train_X, train_y, test_X, test_y):
@@ -72,7 +66,8 @@ def eval_classifiers(train_X, train_y, test_X, test_y):
     AdaBoostClassifier(),
     GaussianNB(),
     QuadraticDiscriminantAnalysis(),
-]
+    ]
+
     metrics = [accuracy_score,
                roc_auc_score,
                average_precision_score,
@@ -82,8 +77,44 @@ def eval_classifiers(train_X, train_y, test_X, test_y):
                r2_score,
                ]
     
+    metrics_to_str = {accuracy_score: 'accuracy',
+               roc_auc_score: 'roc_auc',
+               average_precision_score: 'ap',
+               mean_absolute_percentage_error: 'mapr',
+               top_k_accuracy_score: 'top-k',
+               f1_score: 'f1',
+               r2_score: 'r2'}
+    
+    clfs_to_str = {
+    KNeighborsClassifier(3): 'knn',
+    SVC(kernel="linear", C=0.025): 'svc',
+    SVC(gamma=2, C=1): 'svc_gamma',
+    GaussianProcessClassifier(1.0 * RBF(1.0)): 'gpr',
+    DecisionTreeClassifier(max_depth=5): 'dtc',
+    RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1): 'rf',
+    MLPClassifier(alpha=1, max_iter=1000): 'mlp',
+    AdaBoostClassifier(): 'ada',
+    GaussianNB(): 'gnb',
+    QuadraticDiscriminantAnalysis(): 'qda',
+    }
+
     preds = {}
-    performance = {}
+
+    train_metrics = [f"train_{metrics_to_str[metric]}" for metric in metrics ]
+    test_metrics = [f"test_{metrics_to_str[metric]}" for metric in metrics ]
+
+    columns = []
+
+    for m in train_metrics:
+        columns.append(m)
+    
+    for m in test_metrics:
+        columns.append(m)
+
+    classifiers_str = [str(clf) for clf in classifiers]
+
+    df = pd.DataFrame(index=classifiers_str, columns=columns)
+    print(df)
     for i, clf in enumerate(classifiers):
         # ax = plt.subplot(len(classifiers) + 1, i)
         clf = make_pipeline(StandardScaler(), clf)
@@ -97,15 +128,14 @@ def eval_classifiers(train_X, train_y, test_X, test_y):
         test_yhat = clf.predict(test_X)
         preds[str(clf)] = [train_yhat, test_yhat]
 
-        m_dict = {}
         # Use sklearn metrics AUC.
         for metric in metrics:
-            m_dict[str(metric)] = {"train": metric(train_y, train_yhat), 
-                                   "test": metric(test_y, test_yhat)}
-        performance[str(clf)] = m_dict
-    # You can create a table with pandas.
-
-    return  preds, performance
+            df[str(metric), f"train_{str(metric)}"] = metric(train_y, train_yhat)
+            df[str(metric), f"test_{str(metric)}"] = metric(test_y, test_yhat)
+        
+    print(df)
+    df.to_csv('classifiers/results/40X_lbp.csv')
+    return  preds, df
 
 if __name__ == "__main__":
     # Use here to test MNIST or other dataset.
@@ -113,12 +143,12 @@ if __name__ == "__main__":
     fnames, X, y = read_features(extractors, root='features/all/', mode='binary', mf='40X')
 
     print(len(fnames), len(X), len(y))
-
+    
+    print(X)
+    
     X_train, X_test, y_train, y_test = split_data(X, y, one_hot_vector=False, test_size=0.3)
 
     print(len(X_train), len(X_test), len(y_train), len(y_test))
-    
-    X_train, X_test = convert_int_list(X_train), convert_int_list(X_test)
-    print(X_test)
-    _, performance = eval_classifiers(X_train, X_test, y_train, y_test)
+    # print(X_test)
+    _, performance = eval_classifiers(X_train, y_train, X_test, y_test)
     print(performance)

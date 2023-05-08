@@ -26,14 +26,16 @@ def read_features(extractors, root='./features/all/', mode='binary', mf='40X'):
     if len(extractors) == 1:
         featuredir = basedir + str(extractors[0]) + '.csv'
         csv = pd.read_csv(featuredir)
-        return [csv['image'], csv[str(extractors[0])], csv['label']]
+        return [csv['image'], csv.iloc[:, 2:], csv['label']]
     
 
     for extractor in extractors:
         featuredir = basedir + str(extractor) + '.csv'
         csv = pd.read_csv(featuredir)
-        X.append(csv[str(extractor)])
-    return [csv['image'], X, csv['label']]
+        for col in csv.columns():
+            if str(extractor) in col: 
+                X.append(csv[col])
+    return csv['image'], np.array(X, dtype=np.float32), csv['label']
 
 
 def read_data(root, mf, mode = 'binary', shuffle= True):
