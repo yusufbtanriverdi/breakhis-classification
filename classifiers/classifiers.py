@@ -8,7 +8,7 @@ sys.path.append(parent_dir)
 # Now we can import the tools module
 
 from tools import read_images, binary_paths
-from stack import read_data, read_features
+from stack import read_features, split_data
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -48,6 +48,14 @@ def eval_classifiers(train_X, train_y, test_X, test_y):
 
     return  train_performance, test_performance
 """
+
+def convert_int_list(arr):
+    for i, s in enumerate(arr):
+        s = s[1:-1]
+        print(s)
+        arr[i] = list(map(np.float64, s.split(' ')))
+    return arr
+
 # TODO: Try with MNIST
 # You can try to list parameters of classifier here.
 def eval_classifiers(train_X, train_y, test_X, test_y):
@@ -105,4 +113,12 @@ if __name__ == "__main__":
     fnames, X, y = read_features(extractors, root='features/all/', mode='binary', mf='40X')
 
     print(len(fnames), len(X), len(y))
-    pass
+
+    X_train, X_test, y_train, y_test = split_data(X, y, one_hot_vector=False, test_size=0.3)
+
+    print(len(X_train), len(X_test), len(y_train), len(y_test))
+    
+    X_train, X_test = convert_int_list(X_train), convert_int_list(X_test)
+    print(X_test)
+    _, performance = eval_classifiers(X_train, X_test, y_train, y_test)
+    print(performance)

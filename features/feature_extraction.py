@@ -23,13 +23,6 @@ sys.path.append(parent_dir)
 from classifiers.stack import read_data
 from torchvision import transforms
 
-extractors = [GLCM]
-
-def save_features(X, filename):
-    """Save the extracted features to a CSV file using Pandas."""
-    df = pd.DataFrame(X)
-    df.to_csv(filename, index=False)
-
 def extract_features(stacks, extractors=None, save=True, feature_dir="features/all/binary/40X/"):
     """Extract features from input images using specified feature extractors."""
     
@@ -46,25 +39,22 @@ def extract_features(stacks, extractors=None, save=True, feature_dir="features/a
     fnames = np.array(stacks)[:, 2]
     # Initialize feature matrix.
     X = []
-
-    for j in tqdm(range(len(imgs))):
+    dicto = {"image": fnames, 'label': y}
+    filename = feature_dir
+    for i, feature_extractor in enumerate(extractors):
         tmp = []
-        for i, feature_extractor in enumerate(extractors):
+        for j in tqdm(range(len(imgs))):
             tmp.append(feature_extractor.describe(imgs[j]))
+        filename += str(feature_extractor)
+        dicto[str(feature_extractor)] = tmp
         X.append(np.array(tmp, dtype=np.float64))
-        if save:
-            X_with_y = X.copy()
-            X_with_y.append(y)
-            filename = feature_dir + str(feature_extractor)
-            save_features(X_with_y, fnames, title = str(feature_extractor), filename=filename)
+    if save:
+        filename += '.csv'
+        print(dicto)
+        df = pd.DataFrame.from_dict(dicto)
+        df.to_csv(filename, index=False)
+        
     return fnames, X, y
-
-    
-def save_features(X, fnames, title, filename):
-    """Save the extracted features to a CSV file using Pandas."""
-    dicto = {"image": fnames, title: X, 'label': y}
-    df = pd.DataFrame.from_dict(dicto)
-    df.to_csv(filename, index=False)
 
 if __name__ == "__main__":
     extractors = [LocalBinaryPatterns(numPoints=8, radius=1)]
@@ -75,5 +65,5 @@ if __name__ == "__main__":
         raise IndexError
     
     mf = '40X'
-    fnames, X, y = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}')
+    fnames, X, y = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/')
     
