@@ -8,7 +8,7 @@ sys.path.append(parent_dir)
 # Now we can import the tools module
 
 from tools import read_images, binary_paths
-from .stack import prepare_data
+from .stack import prepare_data, read_data, read_features
 from  .metrics import auc
 
 import numpy as np
@@ -104,4 +104,6 @@ def eval_classifiers(train_X, train_y, test_X, test_y):
 
 if __name__ == "__main__":
     # Use here to test MNIST or other dataset.
+    extractors = ['lbp']
+    fnames, X, y = read_features(extractors, root='./features/all/', mode='binary', mf='40X')
     pass

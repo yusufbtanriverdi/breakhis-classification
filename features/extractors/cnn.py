@@ -47,6 +47,9 @@ class CNN_extractor():
             features_arr.append(features.squeeze())
             
         return features_arr
+    
+    def __str__(self):
+        return 'cnn'
 
 
 if __name__ == "__main__":

@@ -49,3 +49,6 @@ class HOS:
     def get_feature(self, image):
         return np.array(self.describe(image), dtype=np.float64)
 
+    def __str__(self):
+        return 'hos'
+

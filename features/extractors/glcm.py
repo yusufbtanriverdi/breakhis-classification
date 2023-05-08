@@ -36,6 +36,9 @@ class GLCM:
             features.extend(feature_vector)
 
         return np.array(features)
+    
+    def __str__(self):
+        return 'glcm'
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt

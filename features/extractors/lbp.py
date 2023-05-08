@@ -22,6 +22,9 @@ class LocalBinaryPatterns():
 
   def get_feature(self, image):
     return np.array(self.describe(image)[0], dtype=np.float64)
+  
+  def __str__(self):
+    return 'lbp'
 
 if __name__ == "__main__":
   import matplotlib.pyplot as plt

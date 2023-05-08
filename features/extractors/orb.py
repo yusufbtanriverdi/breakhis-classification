@@ -20,6 +20,9 @@ class ORB:
     
     def get_feature(self, image):
         return np.array(self.describe(image), dtype=np.float64)
+    
+    def __str__(self):
+        return 'orb'
 
 if __name__ == "__main__":
     # Load an example image

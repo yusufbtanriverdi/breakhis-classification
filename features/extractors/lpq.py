@@ -60,7 +60,10 @@ class LPQ:
             LPQdesc = LPQdesc/LPQdesc.sum()
 
         return LPQdesc
-
+    
+    def __str__(self):
+        return 'lpq'
+    
 if __name__ == "__main__":
 
     # Load image and convert to grayscale

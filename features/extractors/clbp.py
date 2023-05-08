@@ -20,6 +20,9 @@ class CLBP:
         feature_vector = np.concatenate([feature_vector, ~feature_vector])
         return feature_vector
     
+    def __str__(self):
+        return 'clbp'
+    
 if __name__ == "__main__":
     image = cv2.imread('/Users/melikapooyan/Downloads/BreaKHis_v1/breast/benign/SOB/adenosis/SOB_B_A_14-22549AB/40X/SOB_B_A-14-22549AB-40-003.png')
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

@@ -27,6 +27,9 @@ class HOG:
         # Returns image, should it?
         return np.array(hog_image)
 
+    def __str__(self):
+        return 'hog'
+
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

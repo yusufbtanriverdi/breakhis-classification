@@ -30,7 +30,7 @@ def save_features(X, filename):
     df = pd.DataFrame(X)
     df.to_csv(filename, index=False)
 
-def extract_features(stacks, extractors=None, save=True, filename="features.csv"):
+def extract_features(stacks, extractors=None, save=True, feature_dir="features/all/binary/40X/"):
     """Extract features from input images using specified feature extractors."""
     
     # Get number of samples and number of feature extractors.
@@ -52,8 +52,11 @@ def extract_features(stacks, extractors=None, save=True, filename="features.csv"
         for i, feature_extractor in enumerate(extractors):
             tmp.append(feature_extractor.describe(imgs[j]))
         X.append(np.array(tmp, dtype=np.float64))
-    if save:
-        save_features(X, fnames, filename=filename)
+        if save:
+            X_with_y = X.copy()
+            X_with_y.append(y)
+            filename = feature_dir + str(feature_extractor)
+            save_features(X_with_y, fnames, filename=filename)
     return X, y
 
     
@@ -67,5 +70,6 @@ def save_features(X, fnames, filename):
 if __name__ == "__main__":
     extractors = [LocalBinaryPatterns(numPoints=8, radius=1)]
 
-    stack  = read_data(root='D:\\BreaKHis_v1\\', mf='40X', mode='binary')
-    X, y = extract_features(stack, extractors=extractors, save=True, filename='features/all/lbp.csv')
+    stack  = read_data(root='D:\\BreaKHis_v1\\', mf='40X', mode='binary', shuffle=False)
+    mf = '40X'
+    X, y = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/')

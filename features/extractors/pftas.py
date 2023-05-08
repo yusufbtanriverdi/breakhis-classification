@@ -38,6 +38,9 @@ class PFTAS:
 
         return features
 
+    def __str__(self):
+        return 'pftas'
+
 if __name__ == '__main__':
     pftas = PFTAS()
     image = cv2.imread('/Users/melikapooyan/Downloads/BreaKHis_v1/breast/benign/SOB/adenosis/SOB_B_A_14-22549AB/40X/SOB_B_A-14-22549AB-40-005.png')

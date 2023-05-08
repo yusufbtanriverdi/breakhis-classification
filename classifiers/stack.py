@@ -4,6 +4,8 @@ from sklearn.model_selection import train_test_split
 import sys
 import os
 from tqdm import tqdm
+import pandas as pd
+
 # Get the parent directory path
 parent_dir = os.path.abspath(os.path.join(os.getcwd(), "."))
 # Add the parent directory to the Python path
@@ -18,8 +20,15 @@ def np_one_hot_encoder(y):
     v[np.arange(y.size), y] = 1
     return v
 
-def read_features(feature_extractor, imgs, root='./features/all/'):
-    pass
+def read_features(extractors, root='./features/all/', mode='binary', mf='40X'):
+    basedir = root + mode + '/' + mf + '/'
+    X = []
+    for extractor in extractors:
+        featuredir = basedir + str(extractor)
+        csv = pd.read_csv(featuredir)
+        X.append(csv[1])
+    return [csv[0], X, csv[-1]]
+
 
 def read_data(root, mf, mode = 'binary', shuffle= True):
     if mode == 'binary':
