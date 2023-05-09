@@ -14,7 +14,7 @@ class ResNet():
         if weights == 'ImageNet':
             pretrained_model = models.resnet18(pretrained=True)
 
-        self.layer = list(pretrained_model.children())[:last_layer_ind]
+        self.layer = list(pretrained_model.children())[:-3]
         
     def __str__(self):
         return 'resnet18'
@@ -42,8 +42,24 @@ class ResNet():
 
 
 if __name__ == "__main__":
-    # image_path = "/path/ ... "
-    # pretrained_model = models.name_of_the_NN(pretrained=True)
+    image_path = "C:/Users/hadil/Documents/projects/Machine Learning/project/breast/benign/SOB/adenosis/SOB_B_A_14-22549AB/40X/SOB_B_A-14-22549AB-40-001.png"
+    pretrained_model = models.resnet18(pretrained=True)
 
-    # features = extract_dlfeature(image, model)
     pass
+
+obj = ResNet('ImageNet', -3)
+obj.describe(image_path)
+features = obj.describe(image_path)
+
+# Create a 16x32 grid of subplots (to fit all 512 features)
+fig, axs = plt.subplots(nrows=16, ncols=16, figsize=(16, 8))
+
+# Loop over the features and plot each one as an image in a subplot
+for i in range(len(features)):
+    row = i // 16
+    col = i % 16
+    axs[row, col].imshow(features[i], cmap='gray')
+    axs[row, col].axis('off')
+
+# Show the plot
+plt.show()
