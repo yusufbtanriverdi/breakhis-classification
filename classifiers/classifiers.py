@@ -9,6 +9,7 @@ sys.path.append(parent_dir)
 
 from tools import read_images, binary_paths
 from stack import read_features, split_data
+from metrics import null_accuracy
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -132,6 +133,15 @@ def eval_classifiers(train_X, train_y, test_X, test_y, **kwargs):
             df.loc[classifiers_str[i], f"test_{metrics_to_str[metric]}"] = metric(test_y, test_yhat)
             df.loc[classifiers_str[i], "score"] = score
 
+    """        
+    train_null_acc = null_accuracy(accuracy_score(train_yhat, train_y), train_y)
+    df['train_null_accuracy'] = train_null_acc
+
+    test_null_acc = null_accuracy(accuracy_score(test_yhat, test_y), test_y)
+    df['test_null_accuracy'] = test_null_acc
+    
+    """
+
     print(df)
     
     info = kwargs["info"]
@@ -143,7 +153,7 @@ def eval_classifiers(train_X, train_y, test_X, test_y, **kwargs):
     filename += info['mf']
     filename += info['mode']
     filename += '.csv'
-    
+
     df.to_csv(filename)
     return  preds, df
 
@@ -162,3 +172,4 @@ if __name__ == "__main__":
                                                                               'mode': 'binary',
                                                                               'mf': '40X'})
     print(performance)
+
