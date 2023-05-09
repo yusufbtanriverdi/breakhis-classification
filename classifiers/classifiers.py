@@ -53,7 +53,7 @@ def eval_classifiers(train_X, train_y, test_X, test_y):
 
 # TODO: Try with MNIST
 # You can try to list parameters of classifier here.
-def eval_classifiers(train_X, train_y, test_X, test_y):
+def eval_classifiers(train_X, train_y, test_X, test_y, **kwargs):
     """Pseudo -code. Do not RUN yet."""
     # Example classifiers: https://scikit-learn.org/stable/auto_examples/classification/plot_classifier_comparison.html 
     classifiers = [
@@ -133,7 +133,18 @@ def eval_classifiers(train_X, train_y, test_X, test_y):
             df.loc[classifiers_str[i], "score"] = score
 
     print(df)
-    df.to_csv('classifiers/results/40X_lbp.csv')
+    
+    info = kwargs["info"]
+    filename = 'classifiers/results/'
+    for ex in info['extractors']:
+        filename += ex
+    
+    filename += '_'
+    filename += info['mf']
+    filename += info['mode']
+    filename += '.csv'
+    
+    df.to_csv(filename)
     return  preds, df
 
 if __name__ == "__main__":
@@ -147,5 +158,7 @@ if __name__ == "__main__":
 
     # print(len(X_train), len(X_test), len(y_train), len(y_test))
     # print(X_test)
-    _, performance = eval_classifiers(X_train, y_train, X_test, y_test)
+    _, performance = eval_classifiers(X_train, y_train, X_test, y_test, info={'extractors': extractors,
+                                                                              'mode': 'binary',
+                                                                              'mf': '40X'})
     print(performance)
