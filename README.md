@@ -44,3 +44,6 @@
 ### References
 
 - [1] A Dataset for Breast Cancer Histopathological Image Classification, Fabio A. et. al.
+
+eccentricity
+compactness

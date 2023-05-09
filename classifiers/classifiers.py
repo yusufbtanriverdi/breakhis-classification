@@ -27,6 +27,7 @@ from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.inspection import DecisionBoundaryDisplay
 from sklearn.metrics import accuracy_score, roc_auc_score, average_precision_score, mean_absolute_percentage_error, top_k_accuracy_score, f1_score, r2_score
 import pandas as pd
+from tqdm import tqdm
 
 """# TODO: Try with MNIST
 # You can try to list parameters of classifier here.
@@ -72,7 +73,6 @@ def eval_classifiers(train_X, train_y, test_X, test_y):
                roc_auc_score,
                average_precision_score,
                mean_absolute_percentage_error,
-               top_k_accuracy_score,
                f1_score,
                r2_score,
                ]
@@ -81,7 +81,6 @@ def eval_classifiers(train_X, train_y, test_X, test_y):
                roc_auc_score: 'roc_auc',
                average_precision_score: 'ap',
                mean_absolute_percentage_error: 'mapr',
-               top_k_accuracy_score: 'top-k',
                f1_score: 'f1',
                r2_score: 'r2'}
     
@@ -114,8 +113,8 @@ def eval_classifiers(train_X, train_y, test_X, test_y):
     classifiers_str = [str(clf) for clf in classifiers]
 
     df = pd.DataFrame(index=classifiers_str, columns=columns)
-    print(df)
-    for i, clf in enumerate(classifiers):
+    
+    for i, clf in tqdm(enumerate(classifiers), desc="Classifiers are running...."):
         # ax = plt.subplot(len(classifiers) + 1, i)
         clf = make_pipeline(StandardScaler(), clf)
         clf.fit(train_X, train_y)
@@ -123,16 +122,16 @@ def eval_classifiers(train_X, train_y, test_X, test_y):
         # DecisionBoundaryDisplay.from_estimator(
         #     clf, train_X, cmap='turbo', alpha=0.8, ax=ax, eps=0.5
         # )
-        print(score)
         train_yhat = clf.predict(train_X)
         test_yhat = clf.predict(test_X)
         preds[str(clf)] = [train_yhat, test_yhat]
 
         # Use sklearn metrics AUC.
         for metric in metrics:
-            df[str(metric), f"train_{str(metric)}"] = metric(train_y, train_yhat)
-            df[str(metric), f"test_{str(metric)}"] = metric(test_y, test_yhat)
-        
+            df.loc[classifiers_str[i], f"train_{metrics_to_str[metric]}"] = metric(train_y, train_yhat)
+            df.loc[classifiers_str[i], f"test_{metrics_to_str[metric]}"] = metric(test_y, test_yhat)
+            df.loc[classifiers_str[i], "score"] = score
+
     print(df)
     df.to_csv('classifiers/results/40X_lbp.csv')
     return  preds, df
@@ -142,13 +141,11 @@ if __name__ == "__main__":
     extractors = ['lbp']
     fnames, X, y = read_features(extractors, root='features/all/', mode='binary', mf='40X')
 
-    print(len(fnames), len(X), len(y))
-    
-    print(X)
-    
+    # print(len(fnames), len(X), len(y))
+        
     X_train, X_test, y_train, y_test = split_data(X, y, one_hot_vector=False, test_size=0.3)
 
-    print(len(X_train), len(X_test), len(y_train), len(y_test))
+    # print(len(X_train), len(X_test), len(y_train), len(y_test))
     # print(X_test)
     _, performance = eval_classifiers(X_train, y_train, X_test, y_test)
     print(performance)
