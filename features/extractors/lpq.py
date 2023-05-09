@@ -24,11 +24,18 @@ class LPQ:
             w2 = np.conj(w1)
         return w0, w1, w2
 
-    def compute_LPQdesc(self, img):
+
+
+    def describe(self, img):
         img = np.float64(img)
         r = (self.winSize-1)/2
         x = np.arange(-r,r+1)[np.newaxis]
         w0, w1, w2 = self.compute_STFT_filters(x)
+        # print(w0.shape)
+        # print(w1.shape)
+        # print(w2.shape)
+        # print(img.shape)
+        
 
         # Run filters to compute the frequency response in the four points. Store real and imaginary parts separately
         # Run first filter
@@ -46,6 +53,16 @@ class LPQ:
         # Perform quantization and compute LPQ codewords
         inds = np.arange(freqResp.shape[2])[np.newaxis,np.newaxis,:]
         LPQdesc = ((freqResp>0)*(2**inds)).sum(2)
+        # print(filterResp1.shape)
+        # print(filterResp2.shape)
+        # print(filterResp3.shape)
+        # # print(filterResp4.shape)
+        # print(img.shape)
+        # print(w0.T.shape)
+        # filterResp1 = convolve2d(convolve2d(img,w0.T,self.convmode),w1,self.convmode)
+        
+        
+
 
         # Switch format to uint8 if LPQ code image is required as output
         if self.mode == 'im':
@@ -72,7 +89,7 @@ if __name__ == "__main__":
 
     # Compute LPQ descriptor and histogram
     lpq = LPQ()
-    lpq_desc = lpq.compute_LPQdesc(gray)
+    lpq_desc = lpq.describe(gray)
     hist = plt.hist(lpq_desc, bins=256)
     print (lpq_desc)
     print(hist[0])
