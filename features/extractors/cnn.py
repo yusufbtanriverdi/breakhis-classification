@@ -7,38 +7,49 @@ import matplotlib.pyplot as plt
 import torchvision.models as models
 import cv2 as cv
 
+model_name_to_layer_inds = {'resnet18': (0, -1),
+                            'resnet52': (0, -1)}
 
-class ResNet():
-    def __init__(self, weights='ImageNet', last_layer_ind=-3):
+class CNN_extractor():
+    def __init__(self, pretrained_model, model_name = 'resnet18', layer_inds=None, mode='name'):
+
+        if mode not in ['layer', 'name']:
+            raise ValueError
+
+        if mode == 'layer' and layer_inds == None:
+            raise ValueError
         
-        if weights == 'ImageNet':
-            pretrained_model = models.resnet18(pretrained=True)
+        self.mode = mode
+        self.base_model = pretrained_model
+        self.model_name = model_name
 
-        self.layer = list(pretrained_model.children())[:last_layer_ind]
+        if mode == 'name':
+            # Extract layers from the model.
+            layer_inds = model_name_to_layer_inds[self.model_name]
+            layer_names = list(self.base_model.children())[layer_inds[0]:layer_inds[1]]
+
+            self.model = nn.Sequential(*layer_names)
         
     def __str__(self):
-        return 'resnet18'
+        return str(self.model)
     
-    def describe(self, image_path):
-        # Requires image to be Pillow.
+    def extract_features(self, image_arr):
+         # Add batch dimension
+        features_arr = []
+        for image in image_arr:
+            image = image.unsqueeze(0) 
 
-        # Load the image and apply the necessary transformations
-        image = Image.open(image_path).convert('RGB')
-        transform = transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-            ])
-        image = transform(image)
-        image = image.unsqueeze(0)  # Add batch dimension
-
-        model = nn.Sequential(*self.layer)
-        model.eval()
-        with torch.no_grad():
-                features = model(image)
-
-        return features.squeeze()
+            # Freeze model and extract features.
+            self.model.eval()
+            with torch.no_grad():
+                features = self.model(image)
+            
+            features_arr.append(features.squeeze())
+            
+        return features_arr
+    
+    def __str__(self):
+        return 'cnn'
 
 
 if __name__ == "__main__":
