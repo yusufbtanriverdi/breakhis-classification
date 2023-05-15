@@ -29,11 +29,10 @@ def read_images(path_arr, label):
             # Resize image to minimum width and height
             # resized_img = cv2.resize(img, (min_width, min_height))
             # Let's meta game here:
-            resized_img = cv2.resize(img, (456, 700))
-            
+            resized_img = cv2.resize(img, (456, 700))           
             # Add resized image to list or array
             resized_images.append((resized_img, label, filename))
-
+    
     return resized_images
 
 def binary_paths(root, mf):
