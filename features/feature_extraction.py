@@ -62,9 +62,9 @@ if __name__ == "__main__":
     extractors = [LocalBinaryPatterns(numPoints=8, radius=1)]
 
     stack  = read_data(root='D:/BreaKHis_v1/', mf='40X', mode='binary',shuffle=False)
-    if len(stack) == 0:
+    """    if len(stack) == 0:
         print("Please change data dir!!")
         raise IndexError
     
     mf = '40X'
-    fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/')
+    fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/')"""
