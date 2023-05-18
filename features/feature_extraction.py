@@ -1,7 +1,7 @@
-from extractors.lbp import LocalBinaryPatterns
+#from extractors.lbp import LocalBinaryPatterns
 #from extractors.glcm import GLCM
 # from extractors.orb import ORB
-#from extractors.lpq import LPQ
+from extractors.lpq import LPQ
 # from extractors.pftas import PFTAS
 # from extractors.cnn import CNN_extractor
 # from extractors.fos import FOS
@@ -59,7 +59,7 @@ def extract_features(stacks, extractors=None, save=True, feature_dir="features/a
     return fnames, df
 
 if __name__ == "__main__":
-    extractors = [LocalBinaryPatterns(8, 1)]
+    extractors = [LPQ(8, 1)]
 
     stack  = read_data(root='/Users/melikapooyan/Documents/BreaKHis_v1/breast/', mf='40X', mode='binary',shuffle=False)
     if len(stack) == 0:
