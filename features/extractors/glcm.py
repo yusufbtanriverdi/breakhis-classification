@@ -14,6 +14,9 @@ class GLCM:
         self.angles = angles
         self.levels = levels
 
+    def __str__(self):
+        return "glcm"
+    
     def describe(self, image):
         # Convert image to grayscale
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

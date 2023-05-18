@@ -30,7 +30,10 @@ class CLBP:
         self.radius = radius
         self.neighbors = neighbors
 
-    def compute(self, image):
+    def __str__(self):
+        return "clbp"
+
+    def describe(self, image):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         height, width = gray.shape
         output = np.zeros((height, width), np.uint8)
@@ -44,14 +47,14 @@ class CLBP:
                     if gray[x, y] > center:
                         code += 1 << k
                 output[i, j] = code
-        return output
+        return [output]
 
 
 
 if __name__ == "__main__":
     image = cv2.imread('/Users/melikapooyan/Documents/BreaKHis_v1/breast/benign/SOB/adenosis/SOB_B_A_14-22549AB/40X/SOB_B_A-14-22549AB-40-003.png')
     clbp = CLBP(radius=5, neighbors=24)
-    feature_vector = clbp.compute(image)
+    feature_vector = clbp.describe(image)
     print("CLBP feature vector:", feature_vector)
     print(feature_vector.shape)
 
