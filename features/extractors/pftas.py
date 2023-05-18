@@ -43,7 +43,7 @@ class PFTAS:
 
 if __name__ == '__main__':
     pftas = PFTAS()
-    image = cv2.imread('/Users/melikapooyan/Downloads/BreaKHis_v1/breast/benign/SOB/adenosis/SOB_B_A_14-22549AB/40X/SOB_B_A-14-22549AB-40-005.png')
+    image = cv2.imread('/Users/melikapooyan/Documents/BreaKHis_v1/breast/benign/SOB/adenosis/SOB_B_A_14-22549AB/40X/SOB_B_A-14-22549AB-40-005.png')
     features = pftas.describe(image)
     print(features)
 

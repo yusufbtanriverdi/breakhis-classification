@@ -1,7 +1,7 @@
 from extractors.lbp import LocalBinaryPatterns
-from extractors.glcm import GLCM
+#from extractors.glcm import GLCM
 # from extractors.orb import ORB
-# from extractors.lpq import LPQ
+#from extractors.lpq import LPQ
 # from extractors.pftas import PFTAS
 # from extractors.cnn import CNN_extractor
 # from extractors.fos import FOS
@@ -59,12 +59,12 @@ def extract_features(stacks, extractors=None, save=True, feature_dir="features/a
     return fnames, df
 
 if __name__ == "__main__":
-    extractors = [LocalBinaryPatterns(numPoints=8, radius=1)]
+    extractors = [LocalBinaryPatterns(8, 1)]
 
-    stack  = read_data(root='D:/BreaKHis_v1/', mf='40X', mode='binary',shuffle=False)
-    """    if len(stack) == 0:
+    stack  = read_data(root='/Users/melikapooyan/Documents/BreaKHis_v1/breast/', mf='40X', mode='binary',shuffle=False)
+    if len(stack) == 0:
         print("Please change data dir!!")
         raise IndexError
     
     mf = '40X'
-    fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/')"""
+    fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/')

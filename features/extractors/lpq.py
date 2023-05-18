@@ -84,7 +84,7 @@ class LPQ:
 if __name__ == "__main__":
 
     # Load image and convert to grayscale
-    image = cv2.imread('/Users/melikapooyan/Downloads/BreaKHis_v1/breast/benign/SOB/adenosis/SOB_B_A_14-22549AB/40X/SOB_B_A-14-22549AB-40-003.png')
+    image = cv2.imread('/Users/melikapooyan/Documents/BreaKHis_v1/breast/benign/SOB/adenosis/SOB_B_A_14-22549AB/40X/SOB_B_A-14-22549AB-40-003.png')
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Compute LPQ descriptor and histogram
