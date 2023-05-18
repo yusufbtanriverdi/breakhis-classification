@@ -7,11 +7,10 @@
 notebooks\cifar-10-python.tar.gz
 datasets\cifar
 /notebooks/ImageNet
-<<<<<<< HEAD
-/notebooks/CIFAR10
-=======
 environ
 /__pycache__
 __pycache__
 __pycache__\tools.cpython-38.pyc
->>>>>>> d18f6e51f093252336d97bffa16713c2e2554ae9
+features/all/binary/*/*.csv
+features/all/binary/.DS_Store
+features/all/binary/200X/.DS_Store
