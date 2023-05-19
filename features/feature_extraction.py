@@ -68,7 +68,7 @@ def extract_features(stacks, extractors=None, save=True, feature_dir="features/a
 
 if __name__ == "__main__":
     extractors = [# LocalBinaryPatterns(8, 1), 
-                  # LPQ(winSize=3, freqestim=1, mode='nh'),
+                  # LPQ(radius=3, neighbors=8, block_size=3),
                   # GLCM(distances=[1], angles=[0, np.pi/4, np.pi/2, 3*np.pi/4], levels=256),
                   # ORB(num_keypoints=500),
                   # CLBP(radius=5, neighbors=24),
