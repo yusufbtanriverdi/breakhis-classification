@@ -6,6 +6,7 @@ from skimage.color import rgb2gray
 import numpy as np
 
 
+
 # We can get inspired by this tutorial but I need to study theory behind this. 
 # https://www.kaggle.com/code/pluceroo/new-approach-wavelet-packet-decomposition-in-ml 
 if __name__ == "__main__":

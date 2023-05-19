@@ -4,14 +4,23 @@ import numpy as np
 image = cv.imread('../path/...', cv.IMREAD_COLOR)
 image = cv.cvtColor(image, cv.COLOR_BGR2Lab)
 
-class SuperpixelsEx:
+str_to_algorithm = {
+    'SLIC': cv.ximgproc.SLIC,
+    'SLICO': cv.ximgproc.SLICO,
+    'MSLIC': cv.ximgproc.MSLIC
+}
+
+class SuperpixelsEx():
+
+    def __init__(self, algorithm='SLIC'):
+        
+        self.algorithm = str_to_algorithm(algorithm)
 
     def superpixels(self,img):
-        
-        img = cv.GaussianBlur(img, (3, 3), 0)
 
+        img = cv.GaussianBlur(img, (3, 3), 0)
         # instance and run SLIC
-        slic = cv.ximgproc.createSuperpixelSLIC(img, cv.ximgproc.SLIC, 100)
+        slic = cv.ximgproc.createSuperpixelSLIC(img, self.algorithm, 100)
         slic.iterate(10)
 
         # get and draw superpixels
@@ -35,8 +44,7 @@ class SuperpixelsEx:
         return img_clustered, img_superpixeled, labels, num_superpixels
 
 
-
-    def extract_features(self, img):
+    def describe(self, img):
         # Extract color features (mean values for each channel)
         color_features = np.mean(img, axis=(0, 1))
         # Extract shape features (using Hu Moments)
@@ -46,18 +54,18 @@ class SuperpixelsEx:
         shape_features = -np.sign((hu_moments) * np.log10(np.abs(hu_moments)))
         shape_features = shape_features.reshape(-1)
 
-        return np.concatenate((color_features, shape_features))
+        return np.concatenate([color_features, shape_features])
 
+if __name__ == '__main__':
+    my_superpixels = SuperpixelsEx(image)
+    img_clustered, img_superpixeled, labels, num_superpixels = my_superpixels.superpixels(image)
 
-my_superpixels = SuperpixelsEx(image)
-img_clustered, img_superpixeled, labels, num_superpixels = my_superpixels.superpixels(image)
+    all_features = []
+    for k in range(num_superpixels):
+        class_mask = (labels == k).astype("uint8")
+        ma_sk = (labels == k).astype(np.uint8)
+        img_clustered = cv.bitwise_and(super, super, mask=ma_sk)
+        features = my_superpixels.extract_features(img_clustered)
+        all_features.append(features)
 
-all_features = []
-for k in range(num_superpixels):
-    class_mask = (labels == k).astype("uint8")
-    ma_sk = (labels == k).astype(np.uint8)
-    img_clustered = cv.bitwise_and(super, super, mask=ma_sk)
-    features = my_superpixels.extract_features(img_clustered)
-    all_features.append(features)
-
-all_features = np.array(all_features)
+    all_features = np.array(all_features)

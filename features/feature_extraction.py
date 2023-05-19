@@ -8,6 +8,7 @@ from extractors.clbp import CLBP
 from extractors.fos import FOS
 from extractors.hog import HOG
 from extractors.hos import HOS
+from extractors.fft import FFT
 
 #from extractors.lbp import LocalBinaryPatterns
 #from extractors.glcm import GLCM
@@ -45,7 +46,7 @@ def extract_features(stacks, extractors=None, save=True, feature_dir="features/a
 
     # Get filenames
     fnames = np.array(stacks)[:, 2]
-    
+
     # Create a dictionary to save feature points related to that extractor.
     dict_ = {"image": fnames, 'label': y}
 
@@ -59,7 +60,6 @@ def extract_features(stacks, extractors=None, save=True, feature_dir="features/a
             feature_values = extractor.describe(imgs[j])
             for k, value in enumerate(feature_values):  
                 df.loc[j, f"{str(extractor)}_{k}"] = value  
-        print(df)
     if save:
         filename += '.csv'
         df.to_csv(filename, index=False)
@@ -71,8 +71,11 @@ if __name__ == "__main__":
                   # LPQ(winSize=3, freqestim=1, mode='nh'),
                   # GLCM(distances=[1], angles=[0, np.pi/4, np.pi/2, 3*np.pi/4], levels=256),
                   # ORB(num_keypoints=500),
-                  CLBP(radius=5, neighbors=24),
-                  PFTAS()
+                  # CLBP(radius=5, neighbors=24),
+                  # PFTAS()
+                  # FOS(),
+                  # HOS(),
+                  FFT(),
                   ]
 
     stack  = read_data(root='D:/BreaKHis_v1/', mf='40X', mode='binary',shuffle=False)

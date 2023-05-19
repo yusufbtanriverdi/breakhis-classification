@@ -28,12 +28,13 @@ class HOS:
     def __init__(self):
         self.info = "HOS"
 
-    def describe(self, image):
+    def describe(self, image, eps=1e-7):
         # Detect keypoints and compute their descriptors
         
-        glcm_vector = GLCM.describe(image)
+        glcm = GLCM(distances=[1], angles=[0, np.pi/4, np.pi/2, 3*np.pi/4], levels=256)
+        glcm_vector = glcm.describe(image)
 
-        asm = np.sum(glcm_vector**2)
+        asm = np.sum(glcm_vector)**2
 
         gray = rgb2gray(image)
 
@@ -42,9 +43,11 @@ class HOS:
         # I am not sure if it should be a matrix?
         scaled_entropy = entropy_image / entropy_image.max()  
 
+        mean = np.mean(scaled_entropy)
+
         contrast = gray.std()
 
-        return [asm, contrast, scaled_entropy]
+        return [asm, contrast, mean]
     
     def get_feature(self, image):
         return np.array(self.describe(image), dtype=np.float64)

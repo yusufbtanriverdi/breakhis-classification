@@ -36,6 +36,7 @@ import numpy as np
 from scipy import ndimage
 from scipy.stats import kurtosis, skew
 from skimage.exposure import histogram
+import cv2 
 
 class FOS():
 
@@ -43,16 +44,16 @@ class FOS():
         self.info = "FOS"
 
     def describe(self, image):
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         # Detect keypoints and compute their descriptors
-        mean = np.mean(image, axis=(0, 1))
+        mean = np.mean(gray, axis=(0, 1))
         var = ndimage.variance(image)
 
-        hist = histogram(image)
+        hist = histogram(gray)
 
-        skewness = skew(hist)
+        skewness = np.mean(skew(hist))
 
-        kurtosis_ = kurtosis(hist)
-
+        kurtosis_ = np.mean(kurtosis(hist))
 
         return [mean, var, skewness, kurtosis_]
     

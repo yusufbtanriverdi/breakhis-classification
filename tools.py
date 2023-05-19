@@ -4,7 +4,13 @@ import numpy as np
 import cv2
 import glob
 from tqdm import tqdm 
+import re
+import pandas as pd 
 
+def alter_name(fname):
+    fname = fname.split('\\')[-1]
+    return fname.split('.')[0]
+    
 def read_images(path_arr, label):
     # Initialize variables
     min_width = float('inf')
@@ -29,11 +35,21 @@ def read_images(path_arr, label):
             # Resize image to minimum width and height
             # resized_img = cv2.resize(img, (min_width, min_height))
             # Let's meta game here:
-            resized_img = cv2.resize(img, (456, 700))           
+            resized_img = cv2.resize(img, (456, 700))   
+
+            fname = alter_name(filename)
+                                           
             # Add resized image to list or array
-            resized_images.append((resized_img, label, filename))
+            resized_images.append((resized_img, label, fname))
     
     return resized_images
+
+def alter_fnames_for_csv(path, save=True):
+    df = pd.read_csv(path)
+    df['image'] = df['image'].apply(lambda x: alter_name(x))
+    if save:
+        df.to_csv(path, index=False)
+    return df
 
 def binary_paths(root, mf):
     benign = root + f'benign/*/*/*/{mf}/*.png'
@@ -114,8 +130,11 @@ class BreaKHis(Dataset):
         return img, target
 
 if __name__ == '__main__':
+    path = "C:\\Users\\yusuf\\Machine and Deep Learning\\breast_histopathology_clf\\features\\all\\binary\\40X\\pftas.csv"
 
-    import time
+    alter_fnames_for_csv(path)
+    
+    """    import time
     from torchvision import transforms
     import torch
     from torch.utils.data import WeightedRandomSampler, random_split
@@ -160,4 +179,4 @@ if __name__ == '__main__':
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=BATCH_SIZE,                              
                                                              sampler = test_sampler, pin_memory=True)   
       
-    print("Loaders --> ", len(train_loader), len(val_loader), len(test_loader))
+    print("Loaders --> ", len(train_loader), len(val_loader), len(test_loader))"""

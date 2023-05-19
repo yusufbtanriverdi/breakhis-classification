@@ -33,7 +33,7 @@ class CLBP:
     def __str__(self):
         return "clbp"
 
-    def describe(self, image):
+    def describe(self, image, eps = 1e-7):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         height, width = gray.shape
         output = np.zeros((height, width), np.uint8)
@@ -47,7 +47,14 @@ class CLBP:
                     if gray[x, y] > center:
                         code += 1 << k
                 output[i, j] = code
-        return [output]
+
+        # Get histogram of uniform patterns
+        (hist, _) = np.histogram(output.ravel(), bins=np.arange(0, 11), range=(0, 10))
+
+        # Normalize the histogram
+        hist = hist.astype('float')
+        hist /= (hist.sum() + eps)
+        return hist
 
 
 

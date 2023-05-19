@@ -2,30 +2,39 @@ import numpy as np
 from skimage import io, color, filters
 import matplotlib.pyplot as plt
 
-def fft_features(image):
-    # Apply a Gaussian filter to the image to reduce noise
-    filtered_image = filters.gaussian(image, sigma=1)
 
-    # Compute the Fourier transform of the filtered image
-    f = np.fft.fft2(filtered_image)
+class FFT():
 
-    # Shift the zero-frequency component to the center of the spectrum
-    fshift = np.fft.fftshift(f)
+    def __init__(self):
+        pass
 
-    # Compute the magnitude spectrum (absolute value) of the Fourier transform
-    magnitude_spectrum = np.abs(fshift)
+    def __str__(self):
+        return 'fft'
+    
+    def describe(self, image):
+        # Apply a Gaussian filter to the image to reduce noise
+        filtered_image = filters.gaussian(image, sigma=1)
 
-    # Extract the real and imaginary parts of the Fourier coefficients as features
-    real_part = np.real(f)
-    imaginary_part = np.imag(f)
+        # Compute the Fourier transform of the filtered image
+        f = np.fft.fft2(filtered_image)
 
-    # Concatenate the real and imaginary parts into a single feature vector
-    features = np.concatenate((real_part.flatten(), imaginary_part.flatten()))
+        # Shift the zero-frequency component to the center of the spectrum
+        fshift = np.fft.fftshift(f)
 
-    # Normalize the features
-    features /= np.max(features)
+        # Compute the magnitude spectrum (absolute value) of the Fourier transform
+        magnitude_spectrum = np.abs(fshift)
 
-    return features
+        # Extract the real and imaginary parts of the Fourier coefficients as features
+        real_part = np.real(f)
+        imaginary_part = np.imag(f)
+
+        # Concatenate the real and imaginary parts into a single feature vector
+        features = np.concatenate((real_part.flatten(), imaginary_part.flatten()))
+
+        # Normalize the features
+        features /= np.max(features)
+
+        return features
 
 if __name__ == "__main__":
 
@@ -39,10 +48,10 @@ if __name__ == "__main__":
 
     # Convert the image to grayscale
     # gray_image = color.rgb2gray(image)
+    extractor = FFT()
+    benign_features = extractor.describe(benign)
 
-    benign_features = fft_features(benign)
-
-    malign_features = fft_features(malign)
+    malign_features = extractor.describe(malign)
 
     plt.plot(malign_features, 'r')
     plt.plot(benign_features, 'b')
