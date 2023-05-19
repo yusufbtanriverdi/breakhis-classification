@@ -1,20 +1,15 @@
-from extractors.lbp import LocalBinaryPatterns
-from extractors.lpq import LPQ
-from extractors.glcm import GLCM
-from extractors.orb import ORB
-from extractors.pftas import PFTAS
-from extractors.clbp import CLBP
-
-from extractors.fos import FOS
-from extractors.hog import HOG
-from extractors.hos import HOS
-from extractors.fft import FFT
-
 #from extractors.lbp import LocalBinaryPatterns
-#from extractors.glcm import GLCM
-# from extractors.orb import ORB
 from extractors.lpq import LPQ
+#from extractors.glcm import GLCM
+#from extractors.orb import ORB
 # from extractors.pftas import PFTAS
+# from extractors.clbp import CLBP
+
+# from extractors.fos import FOS
+# from extractors.hog import HOG
+# from extractors.hos import HOS
+# from extractors.fft import FFT
+
 # from extractors.cnn import CNN_extractor
 import numpy as np
 import pandas as pd
@@ -32,7 +27,7 @@ sys.path.append(parent_dir)
 from classifiers.stack import read_data
 from torchvision import transforms
 
-def extract_features(stacks, extractors=None, save=True, feature_dir="features/all/binary/40X/"):
+def extract_features(stacks, extractors=None, save=True, feature_dir="features/all/binary/100X/"):
     """Extract features from input images using specified feature extractors."""
     
     # Get number of samples and number of feature extractors.
@@ -67,21 +62,21 @@ def extract_features(stacks, extractors=None, save=True, feature_dir="features/a
     return fnames, df
 
 if __name__ == "__main__":
-    extractors = [# LocalBinaryPatterns(8, 1), 
-                  # LPQ(winSize=3, freqestim=1, mode='nh'),
-                  # GLCM(distances=[1], angles=[0, np.pi/4, np.pi/2, 3*np.pi/4], levels=256),
-                  # ORB(num_keypoints=500),
+    extractors = [#LocalBinaryPatterns(8, 1), 
+                  LPQ(radius=3, neighbors=8, block_size=3),
+                  #GLCM(distances=[1], angles=[0, np.pi/4, np.pi/2, 3*np.pi/4], levels=256),
+                  #ORB(num_keypoints=500),
                   # CLBP(radius=5, neighbors=24),
                   # PFTAS()
                   # FOS(),
                   # HOS(),
-                  FFT(),
+                  #FFT(),
                   ]
 
-    stack  = read_data(root='D:/BreaKHis_v1/', mf='40X', mode='binary',shuffle=False)
+    stack  = read_data(root='/Users/melikapooyan/Documents/BreaKHis_v1/breast/', mf='100X', mode='binary',shuffle=False)
     if len(stack) == 0:
         print("Please change data dir!!")
         raise NotADirectoryError
     
-    mf = '40X'
+    mf = '100X'
     fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/')
