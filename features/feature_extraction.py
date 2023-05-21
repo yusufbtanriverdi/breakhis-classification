@@ -98,17 +98,17 @@ if __name__ == "__main__":
                   # CLBP(radius=5, neighbors=24),
                   # PFTAS()
                   # HOS(),
-                  # HOS(),
+                  FOS(),
                   # FFT(),
-                  SuperpixelsEx()
+                  # SuperpixelsEx()
                   ]
 
-    mf = '40X'
+    mf = '400X'
     stack  = read_data(root='D:/BreaKHis_v1/', mf=mf, mode='binary',shuffle=False)
     if len(stack) == 0:
         print("Please change data dir!!")
         raise NotADirectoryError
     
-    # fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/')
+    fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/')
 
-    fnames, fs = extract_imageLike(stack, extractor=extractors[0], save=True, feature_dir=f'features/all/binary/{mf}/imageLike')
+    # fnames, fs = extract_imageLike(stack, extractor=extractors[0], save=True, feature_dir=f'features/all/binary/{mf}/imageLike')

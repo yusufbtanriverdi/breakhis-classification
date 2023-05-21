@@ -35,7 +35,7 @@ def read_features(extractors, root='./features/all/', mode='binary', mf='40X'):
         for col in csv.columns:
             if str(extractor) in col: 
                 X.append(csv[col])
-    return csv['image'], np.array(X, dtype=np.float32), csv['label']
+    return csv['image'], np.transpose(np.array(X, dtype=np.float32)), csv['label']
 
 
 def read_data(root, mf, mode = 'binary', shuffle= True, imsize=None):
@@ -50,7 +50,7 @@ def read_data(root, mf, mode = 'binary', shuffle= True, imsize=None):
         np.random.shuffle(stack)
     return stack
 
-def stack_data(stacks, transforms=None, features=None, mode='extract'):
+# def stack_data(stacks, transforms=None, features=None, mode='extract'):
     """Stack different classes, apply transforms and features. """
 
     if mode not in ['extract', 'get']:
@@ -80,6 +80,5 @@ def split_data(X, y, one_hot_vector=False, test_size=0.3):
         y = np_one_hot_encoder(y)
     # Return X_train, X_test, y_train, y_test.
     # TODO: Test stratify.
-    print(X)
     return train_test_split(X, y, test_size=test_size, shuffle=True, stratify=y)
 

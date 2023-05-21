@@ -50,10 +50,9 @@ class FOS():
         var = ndimage.variance(image)
 
         hist = histogram(gray)
-
-        skewness = np.mean(skew(hist))
-
-        kurtosis_ = np.mean(kurtosis(hist))
+        # Fill NA with 0
+        skewness = np.mean(np.nan_to_num(skew(hist)))
+        kurtosis_ = np.mean(np.nan_to_num(kurtosis(hist)))
 
         return [mean, var, skewness, kurtosis_]
     
