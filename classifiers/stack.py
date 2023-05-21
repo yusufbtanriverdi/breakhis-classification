@@ -32,18 +32,18 @@ def read_features(extractors, root='./features/all/', mode='binary', mf='40X'):
     for extractor in extractors:
         featuredir = basedir + str(extractor) + '.csv'
         csv = pd.read_csv(featuredir)
-        for col in csv.columns():
+        for col in csv.columns:
             if str(extractor) in col: 
                 X.append(csv[col])
     return csv['image'], np.array(X, dtype=np.float32), csv['label']
 
 
-def read_data(root, mf, mode = 'binary', shuffle= True):
+def read_data(root, mf, mode = 'binary', shuffle= True, imsize=None):
     if mode == 'binary':
         paths = binary_paths(root, mf)
 
-        stack_0 = read_images(paths[0], 0)
-        stack_1 = read_images(paths[1], 1)
+        stack_0 = read_images(paths[0], 0, imsize)
+        stack_1 = read_images(paths[1], 1, imsize)
     
     stack = np.concatenate([stack_0, stack_1])
     if shuffle:
@@ -80,5 +80,6 @@ def split_data(X, y, one_hot_vector=False, test_size=0.3):
         y = np_one_hot_encoder(y)
     # Return X_train, X_test, y_train, y_test.
     # TODO: Test stratify.
+    print(X)
     return train_test_split(X, y, test_size=test_size, shuffle=True, stratify=y)
 

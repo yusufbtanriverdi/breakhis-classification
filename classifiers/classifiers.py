@@ -26,7 +26,10 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.inspection import DecisionBoundaryDisplay
-from sklearn.metrics import accuracy_score, roc_auc_score, average_precision_score, mean_absolute_percentage_error, top_k_accuracy_score, f1_score, r2_score
+from sklearn.metrics import accuracy_score, roc_auc_score, average_precision_score, mean_absolute_percentage_error, f1_score, r2_score, cohen_kappa_score, recall_score
+from sklearn.metrics import make_scorer
+from sklearn.model_selection import cross_val_score
+
 import pandas as pd
 from tqdm import tqdm
 
@@ -76,8 +79,22 @@ def eval_classifiers(train_X, train_y, test_X, test_y, **kwargs):
                mean_absolute_percentage_error,
                f1_score,
                r2_score,
+               recall_score,
+               cohen_kappa_score
                ]
     
+    # Define the list of scoring metrics
+    cv_metrics = [
+        make_scorer(accuracy_score),
+        make_scorer(roc_auc_score),
+        make_scorer(average_precision_score),
+        make_scorer(mean_absolute_percentage_error),
+        make_scorer(f1_score),
+        make_scorer(r2_score),
+        make_scorer(recall_score),
+        make_scorer(cohen_kappa_score)
+    ]
+
     metrics_to_str = {accuracy_score: 'accuracy',
                roc_auc_score: 'roc_auc',
                average_precision_score: 'ap',
@@ -120,27 +137,21 @@ def eval_classifiers(train_X, train_y, test_X, test_y, **kwargs):
         clf = make_pipeline(StandardScaler(), clf)
         clf.fit(train_X, train_y)
         score = clf.score(test_X, test_y)
-        # DecisionBoundaryDisplay.from_estimator(
-        #     clf, train_X, cmap='turbo', alpha=0.8, ax=ax, eps=0.5
-        # )
+        
+        # Apply cross-validated model here.
+        cv_scores = cross_val_score(clf, train_X, train_y, cv=10, scoring=cv_metrics)  # Specify the list of scoring metrics
+        cv_mean_scores = cv_scores.mean(axis=0)  # Compute the mean score for each metric
+    
         train_yhat = clf.predict(train_X)
         test_yhat = clf.predict(test_X)
         preds[str(clf)] = [train_yhat, test_yhat]
 
         # Use sklearn metrics AUC.
-        for metric in metrics:
+        for j, metric in enumerate(metrics):
             df.loc[classifiers_str[i], f"train_{metrics_to_str[metric]}"] = metric(train_y, train_yhat)
             df.loc[classifiers_str[i], f"test_{metrics_to_str[metric]}"] = metric(test_y, test_yhat)
             df.loc[classifiers_str[i], "score"] = score
-
-    """        
-    train_null_acc = null_accuracy(accuracy_score(train_yhat, train_y), train_y)
-    df['train_null_accuracy'] = train_null_acc
-
-    test_null_acc = null_accuracy(accuracy_score(test_yhat, test_y), test_y)
-    df['test_null_accuracy'] = test_null_acc
-    
-    """
+            df.loc[classifiers_str[i], f"cv_{metrics_to_str[metric]}"] = cv_mean_scores[j]
 
     print(df)
     
@@ -159,7 +170,7 @@ def eval_classifiers(train_X, train_y, test_X, test_y, **kwargs):
 
 if __name__ == "__main__":
     # Use here to test MNIST or other dataset.
-    extractors = ['lbp']
+    extractors = ['lbp', 'fos', 'glcm', 'hos', 'pftas']
     fnames, X, y = read_features(extractors, root='features/all/', mode='binary', mf='40X')
 
     # print(len(fnames), len(X), len(y))

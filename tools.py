@@ -11,7 +11,7 @@ def alter_name(fname):
     fname = fname.split('\\')[-1]
     return fname.split('.')[0]
     
-def read_images(path_arr, label):
+def read_images(path_arr, label, imsize=None):
     # Initialize variables
     min_width = float('inf')
     min_height = float('inf')
@@ -35,7 +35,12 @@ def read_images(path_arr, label):
             # Resize image to minimum width and height
             # resized_img = cv2.resize(img, (min_width, min_height))
             # Let's meta game here:
-            resized_img = cv2.resize(img, (456, 700))   
+            
+            if imsize:
+                resized_img = cv2.resize(img, imsize)   
+            else:
+                resized_img = cv2.resize(img, (456, 700))   
+
 
             fname = alter_name(filename)
                                            

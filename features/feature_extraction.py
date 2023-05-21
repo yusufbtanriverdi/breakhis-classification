@@ -9,6 +9,8 @@ from extractors.fos import FOS
 from extractors.hog import HOG
 from extractors.hos import HOS
 from extractors.fft import FFT
+from extractors.hog import HOG
+from extractors.superpixels import SuperpixelsEx
 
 #from extractors.lbp import LocalBinaryPatterns
 #from extractors.glcm import GLCM
@@ -21,6 +23,7 @@ import pandas as pd
 from tqdm import tqdm
 import sys
 import os
+import cv2
 # Get the parent directory path
 parent_dir = os.path.abspath(os.path.join(os.getcwd(), "."))
 # Add the parent directory to the Python path
@@ -34,11 +37,6 @@ from torchvision import transforms
 
 def extract_features(stacks, extractors=None, save=True, feature_dir="features/all/binary/100X/"):
     """Extract features from input images using specified feature extractors."""
-    
-    # Get number of samples and number of feature extractors.
-    num_samples = len(stacks)
-    num_features = len(extractors)
-
     # Initialize target matrix.
     y = np.array(stacks)[:, 1]
     # Get images.
@@ -56,15 +54,41 @@ def extract_features(stacks, extractors=None, save=True, feature_dir="features/a
 
     for extractor in extractors:
         filename += str(extractor)
+
         for j in tqdm(range(len(imgs))):
             feature_values = extractor.describe(imgs[j])
             for k, value in enumerate(feature_values):  
                 df.loc[j, f"{str(extractor)}_{k}"] = value  
+
     if save:
         filename += '.csv'
         df.to_csv(filename, index=False)
 
     return fnames, df
+
+
+def extract_imageLike(stacks, extractor=None, save=True, feature_dir="features/all/binary/100X/imageLike"):
+    """Extract image-like features from input images using specified feature extractors."""
+
+    # Initialize target matrix.
+    y = np.array(stacks)[:, 1]
+    # Get images.
+    imgs = np.array(stacks)[:, 0]
+
+    # Get filenames
+    fnames = np.array(stacks)[:, 2]
+
+    # Build up filename.
+    # df = pd.DataFrame.from_dict(dict_)
+    features = []
+    pkey = str(extractor) 
+    for j in tqdm(range(len(imgs))):
+        feature_values = extractor.describeImage(imgs[j])
+        features.append(feature_values)
+        label = 'benign' if y[j] == 0 else 'malignant'
+        path = feature_dir + f'/{pkey}/{label}/{fnames[j]}.png'
+        cv2.imwrite(path, feature_values)
+    return fnames, features
 
 if __name__ == "__main__":
     extractors = [# LocalBinaryPatterns(8, 1), 
@@ -73,15 +97,18 @@ if __name__ == "__main__":
                   # ORB(num_keypoints=500),
                   # CLBP(radius=5, neighbors=24),
                   # PFTAS()
-                  HOS(),
+                  # HOS(),
                   # HOS(),
                   # FFT(),
+                  SuperpixelsEx()
                   ]
 
-    mf = '100X'
+    mf = '40X'
     stack  = read_data(root='D:/BreaKHis_v1/', mf=mf, mode='binary',shuffle=False)
     if len(stack) == 0:
         print("Please change data dir!!")
         raise NotADirectoryError
     
-    fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/')
+    # fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/')
+
+    fnames, fs = extract_imageLike(stack, extractor=extractors[0], save=True, feature_dir=f'features/all/binary/{mf}/imageLike')

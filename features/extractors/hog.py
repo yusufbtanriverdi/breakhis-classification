@@ -4,15 +4,17 @@ from skimage.transform import resize
 from skimage.feature import hog
 import matplotlib.pyplot as plt
 import numpy as np
+import cv2
 
 class HOG:
     """
     Computes h. oriented gradients of image and extracts.
     """
-    def __init__(self, orientations = 9, pixels_per_cell = (8, 8), cells_per_block = (2, 2)):
+    def __init__(self, orientations = 9, pixels_per_cell = (8, 8), cells_per_block = (2, 2), block_norm='L1-sqrt'):
         self.orientations = orientations
         self.pixels_per_cell = pixels_per_cell
         self.cells_per_block = cells_per_block
+        self.block_norm = block_norm
 
 
     def describe(self, image):
@@ -21,12 +23,30 @@ class HOG:
         resized_img = resize(image, (128*4, 64*4))
 
         # creating hog features
-        fd, hog_image = hog(resized_img, orientations=self.orientations, pixels_per_cell=self.pixels_per_cell,
+        fd, hog_image = hog(resized_img, 
+                            orientations=self.orientations, 
+                            pixels_per_cell=self.pixels_per_cell, 
+                            block_norm = self.block_norm,
+                            cells_per_block=self.cells_per_block, visualize=True, channel_axis=-1)
+
+        # Returns image, should it?
+        return fd
+
+    def describeImage(self, image):
+                # Check if the image needs to be rescaled
+        # resizing image
+        resized_img = resize(image, (128*4, 64*4))
+
+        # creating hog features
+        fd, hog_image = hog(resized_img, 
+                            orientations=self.orientations, 
+                            pixels_per_cell=self.pixels_per_cell, 
+                            block_norm = self.block_norm,
                             cells_per_block=self.cells_per_block, visualize=True, channel_axis=-1)
 
         # Returns image, should it?
         return np.array(hog_image)
-
+    
     def __str__(self):
         return 'hog'
 
@@ -46,8 +66,15 @@ if __name__ == "__main__":
     print(resized_img.shape)
 
     # creating hog features
-    fd, hog_image = hog(resized_img, orientations=9, pixels_per_cell=(8, 8),
-                        cells_per_block=(2, 2), visualize=True, channel_axis=-1)
+    extractor = HOG(orientations=9, pixels_per_cell=(8, 8), block_norm = 'L1-sqrt',
+                        cells_per_block=(2, 2))
+    
+    hog_image = extractor.describeImage(resized_img)
+
     plt.axis("off")
     plt.imshow(hog_image, cmap="gray")
+    cv2.imshow('tamam', hog_image)
+    cv2.imwrite('tamam.tiff', hog_image)
+    hog_im = cv2.imread('tamam.png')
+    cv2.imshow('tamam mi',hog_im)
     plt.show()
