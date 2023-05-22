@@ -45,7 +45,7 @@ class HOG:
                             cells_per_block=self.cells_per_block, visualize=True, channel_axis=-1)
 
         # Returns image, should it?
-        return np.array(hog_image)
+        return (hog_image * 255).astype(np.uint8)
     
     def __str__(self):
         return 'hog'
@@ -70,11 +70,10 @@ if __name__ == "__main__":
                         cells_per_block=(2, 2))
     
     hog_image = extractor.describeImage(resized_img)
-
-    plt.axis("off")
-    plt.imshow(hog_image, cmap="gray")
-    cv2.imshow('tamam', hog_image)
-    cv2.imwrite('tamam.tiff', hog_image)
-    hog_im = cv2.imread('tamam.png')
-    cv2.imshow('tamam mi',hog_im)
+    print(np.unique(hog_image))
+    # Scale the image to the range [0, 255]
+    image_8bit = (hog_image * 255).astype(np.uint8)
+    plt.imshow(image_8bit)
     plt.show()
+    cv2.imwrite("tamam.png", hog_image)
+    cv2.imwrite("tamam255.png", image_8bit)

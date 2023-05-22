@@ -1,7 +1,8 @@
 import cv2 as cv
 import numpy as np
 
-class SuperpixelsEx():
+# Hugely collinear!!
+class ShapeEx():
 
     def __init__(self):
         pass
