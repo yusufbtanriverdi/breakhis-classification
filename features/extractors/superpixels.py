@@ -37,25 +37,26 @@ class SuperpixelsEx():
         img_clustered = np.zeros_like(img)
 
         num_superpixels = slic.getNumberOfSuperpixels()
-
+        print(num_superpixels)
         for k in range(num_superpixels):
             class_mask = (labels == k).astype("uint8")
             mean_color = cv.mean(img, class_mask)
             img_clustered[class_mask != 0, :] = mean_color[:3]
 
-        return labels
+        return img_clustered, img_superpixeled, labels, num_superpixels
 
 
-    def describe(self, img):
+    def extract_features(self, img):
         # Extract color features (mean values for each channel)
         color_features = np.mean(img, axis=(0, 1))
+
         # Extract shape features (using Hu Moments)
         gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
         moments = cv.moments(gray_img)
         hu_moments = cv.HuMoments(moments)
         shape_features = hu_moments.reshape(-1)
 
-        return np.concatenate([color_features, shape_features])
+        return np.concatenate((color_features, shape_features))
 
 if __name__ == '__main__':
     image = cv.imread('.\examples\SOB_B_A-14-22549AB-40-019.png', cv.IMREAD_COLOR)
@@ -65,13 +66,18 @@ if __name__ == '__main__':
     print(np.unique(labels), num_superpixels) 
     plt.imshow(labels)
     plt.show()
-    cv.imwrite('.\examples\superpixel.png', labels)
+    cv.imwrite("C:/Users/hadil/Documents/projects/Machine Learning/project/breast/benign/SOB/adenosis/SOB_B_A_14-22549AB/40X/SOB_B_A-14-22549AB-40-001.png", labels)
     all_features = []
-    """    for k in range(num_superpixels):
+    for k in range(num_superpixels):
         class_mask = (labels == k).astype("uint8")
         ma_sk = (labels == k).astype(np.uint8)
-        img_clustered = cv.bitwise_and(super, super, mask=ma_sk)
-        features = my_superpixels.describeImage(img_clustered)
-        all_features.append(features)"""
+        img_clustered = cv.bitwise_and(img_superpixeled, img_superpixeled, mask=ma_sk)
+        features = my_superpixels.extract_features(img_clustered)
+        all_features.append(features)
+
 
     all_features = np.array(all_features)
+    print(all_features.shape)
+
+    #Just for testing:
+    #np.savetxt('all_features.csv', all_features, delimiter=',')
