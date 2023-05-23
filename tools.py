@@ -1,3 +1,4 @@
+from typing import Any
 from torch.utils.data import Dataset
 import numpy as np
 
@@ -112,6 +113,8 @@ class BreaKHis(Dataset):
         self.targets = pairs[:, 1]
         self.weight = make_weights_for_balanced_classes(pairs, self.nclasses)
 
+        self.mean = np.mean(pairs[:, 0], axis=0)
+
     def __len__(self):
         return len(self.images)
     
@@ -133,7 +136,8 @@ class BreaKHis(Dataset):
             target = self.target_transform(target)
 
         return img, target
-
+    
+    
 if __name__ == '__main__':
     # path = "C:\\Users\\yusuf\\Machine and Deep Learning\\breast_histopathology_clf\\features\\all\\binary\\40X\\pftas.csv"
 
