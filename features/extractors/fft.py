@@ -53,6 +53,7 @@ if __name__ == "__main__":
 
     malign_features = extractor.describe(malign)
 
+    print(benign_features.shape)
     plt.plot(malign_features, 'r')
     plt.plot(benign_features, 'b')
     plt.show()

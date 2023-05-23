@@ -120,7 +120,7 @@ class BreaKHis(Dataset):
         Args:
             index (int): Index
         Returns:
-            tuple: Tuple (image, target). target is the object returned by ``coco.loadAnns``.
+            tuple: Tuple (image, target).
         """
 
         img = self.images[index]
@@ -135,11 +135,12 @@ class BreaKHis(Dataset):
         return img, target
 
 if __name__ == '__main__':
-    path = "C:\\Users\\yusuf\\Machine and Deep Learning\\breast_histopathology_clf\\features\\all\\binary\\40X\\pftas.csv"
+    # path = "C:\\Users\\yusuf\\Machine and Deep Learning\\breast_histopathology_clf\\features\\all\\binary\\40X\\pftas.csv"
 
-    alter_fnames_for_csv(path)
+    # alter_fnames_for_csv(path)
     
-    """    import time
+
+    import time
     from torchvision import transforms
     import torch
     from torch.utils.data import WeightedRandomSampler, random_split
@@ -166,22 +167,25 @@ if __name__ == '__main__':
     
     BATCH_SIZE = 16
     # For unbalanced dataset we create a weighted sampler                                                                                     
-    weights = torch.DoubleTensor(training_data.dataset.weight)                                       
+    weights = torch.DoubleTensor(training_data.dataset.weight)
+    print(weights)                                       
     training_sampler = WeightedRandomSampler(weights, len(weights))                     
     
     train_loader = torch.utils.data.DataLoader(training_data, batch_size=BATCH_SIZE,                              
                                                              sampler = training_sampler, pin_memory=True)   
     
-    weights = torch.DoubleTensor(val_data.dataset.weight)                                       
+    weights = torch.DoubleTensor(val_data.dataset.weight)  
+    print(weights)                                                                            
     val_sampler = WeightedRandomSampler(weights, len(weights))                     
     
     val_loader = torch.utils.data.DataLoader(val_data, batch_size=BATCH_SIZE,                              
                                                              sampler = val_sampler, pin_memory=True)   
     
     weights = torch.DoubleTensor(test_data.dataset.weight)                                       
+    print(weights)                                       
     test_sampler = WeightedRandomSampler(weights, len(weights))    
 
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=BATCH_SIZE,                              
                                                              sampler = test_sampler, pin_memory=True)   
       
-    print("Loaders --> ", len(train_loader), len(val_loader), len(test_loader))"""
+    print("Loaders --> ", len(train_loader), len(val_loader), len(test_loader))
