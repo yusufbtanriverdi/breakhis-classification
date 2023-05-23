@@ -64,12 +64,12 @@ def extract_text_between_parentheses(string):
         return None  # Return None if no match is found
 
 classifiers = [
-KNeighborsClassifier(3),
-SVC(kernel="linear", C=0.025),
-SVC(gamma=2, C=1),
+KNeighborsClassifier(1),
+SVC(kernel="linear", C=1),
+SVC(gamma='auto', C=1),   
 # GaussianProcessClassifier(1.0 * RBF(1.0)),
-DecisionTreeClassifier(max_depth=5),
-RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
+DecisionTreeClassifier(max_depth=20),
+RandomForestClassifier(max_depth=20, n_estimators=10, max_features=1),
 MLPClassifier(alpha=1, max_iter=1000),
 AdaBoostClassifier(),
 GaussianNB(),
@@ -112,7 +112,7 @@ def eval_classifiers(X, y, **kwargs):
         print(df)
     
     info = kwargs["info"]
-    filename = 'classifiers/results/'
+    filename = 'classifiers/results/40X/'
     for ex in info['extractors']:
         filename += ex
     
