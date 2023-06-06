@@ -4,6 +4,7 @@ from torch.autograd import Variable
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
+# TODO:  Add more metrics.
 
 def train(model, train_loader, optimizer, criterion, cuda=False):
 
@@ -85,4 +86,4 @@ def eval(model, test_loader, train_loader, optimizer, criterion, num_epochs= 50)
 
     axs[1].plot(range(num_epochs), accuracy_scores)
 
-    # TODO: Save results. 
+    # TODO: Save results in a csv. 

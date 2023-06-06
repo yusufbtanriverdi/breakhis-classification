@@ -5,13 +5,9 @@ from torchvision import transforms
 from torch.autograd import Variable
 from torch.optim import lr_scheduler
 from torch.utils.data import WeightedRandomSampler, random_split
-
-
 import matplotlib.pyplot as plt
-
 from tqdm import tqdm
 import time
-
 from models.utilities.losses import FocalLoss
 from models.retinanet import RetinaNet
 from tools import BreaKHis

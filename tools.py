@@ -85,7 +85,7 @@ class BreaKHis(Dataset):
         transform: Transforms to apply on images when calling.
         shuffle: If true, the images will be shuffled.
     """
-    def __init__(self, root='D:\\BreaKHis_v1\\', mf='40X', mode='binary', transform=None, target_transform = None, shuffle=True):
+    def __init__(self, root='D:\\BreaKHis_v1\\', mf='40X', mode='binary', transform=None, target_transform = None, shuffle=True, imageLikefeatures=None):
         super(BreaKHis, self).__init__()
 
         self.transform = transform
@@ -115,6 +115,11 @@ class BreaKHis(Dataset):
 
         self.mean = np.mean(pairs[:, 0], axis=0)
 
+        if imageLikefeatures:
+            for imageLikefeature in imageLikefeatures:
+                # TODO: read features and stack a channel.
+                pass
+            
     def __len__(self):
         return len(self.images)
     
