@@ -5,11 +5,10 @@
 /data
 /notebooks/MNIST
 requirements_melika.txt
-<<<<<<< HEAD
 /notebooks/CIFAR10
-=======
 environ
 /__pycache__
 __pycache__
 __pycache__\tools.cpython-38.pyc
->>>>>>> d18f6e51f093252336d97bffa16713c2e2554ae9
+features\all\binary\40X\imagelike\hog\benign\
+features\all\binary\40X\imagelike\superpixels

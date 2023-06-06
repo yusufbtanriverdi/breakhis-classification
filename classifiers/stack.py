@@ -28,7 +28,6 @@ def read_features(extractors, root='./features/all/', mode='binary', mf='40X'):
         csv = pd.read_csv(featuredir)
         return [csv['image'], csv.iloc[:, 2:], csv['label']]
 
-
     for extractor in extractors:
         featuredir = basedir + str(extractor) + '.csv'
         csv = pd.read_csv(featuredir)
