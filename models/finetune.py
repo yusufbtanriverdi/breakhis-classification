@@ -11,8 +11,14 @@ from tqdm import tqdm
 import time
 from models.utilities.losses import FocalLoss
 from models.retinanet import RetinaNet
-from tools import BreaKHis
 from utilities.phases import *
+import os, sys
+
+parent_dir = os.path.abspath(os.path.join(os.getcwd(), "."))
+# Add the parent directory to the Python path
+sys.path.append(parent_dir)
+
+from tools import BreaKHis
 
 print("Hello User! Dataset is loading....")
 startTime = time.time()
@@ -56,14 +62,7 @@ print("Length of loaders ---> \n",
       len(test_loader), len(test_loader.dataset), "\n"
       )
 
-model = RetinaNet(num_classes=2)
-print("Model summary ---> \n",
-      model)
 
-optimizer = optim.SGD(model.parameters(),
-                      lr=0.01,
-                      momentum=0.9,
-                      weight_decay=0.0001)
 
 # TODO: Later implement.
 #scheduler = lr_scheduler.MultiStepLR(optimizer,
@@ -82,4 +81,9 @@ if __name__ == '__main__':
     models = call_builtin_models()
 
     for model in models.values():
-        eval(model)
+        optimizer = optim.SGD(model.parameters(),
+                      lr=0.01,
+                      momentum=0.9,
+                      weight_decay=0.0001)
+        
+        eval(model, test_loader, train_loader, optimizer, criterion)

@@ -10,8 +10,12 @@ from tqdm import tqdm
 import time
 from models.utilities.losses import FocalLoss
 from models.retinanet import RetinaNet
-from tools import BreaKHis
+import os, sys
 
+parent_dir = os.path.abspath(os.path.join(os.getcwd(), "."))
+# Add the parent directory to the Python path
+sys.path.append(parent_dir)
+from tools import BreaKHis
 
 print("Hello User! Dataset is loading....")
 startTime = time.time()

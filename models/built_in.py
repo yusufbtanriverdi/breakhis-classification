@@ -1,6 +1,11 @@
 import torch
 import torchvision.models as models
 from torchvision import datasets, transforms as T
+import os, sys
+
+parent_dir = os.path.abspath(os.path.join(os.getcwd(), "."))
+# Add the parent directory to the Python path
+sys.path.append(parent_dir)
 from tools import BreaKHis
 
 # from torch hub...
@@ -71,7 +76,7 @@ def GhostNet():
     return ghostnet 
 
 
-def call_builtin_models():
+def call_builtin_models(pretrained=True):
     """
     Returns a dictionary of built-in models. 
 
@@ -107,22 +112,21 @@ def call_builtin_models():
     """
 
     model_dict = {
-    'resnet18': models.resnet18(),
-    'alexnet' : models.alexnet(),
-    'vgg16_bn': models.vgg16_bn,
-    'vgg16' : models.vgg16(),
-    'vgg19_bn': models.vgg19_bn,
-    'vgg19': models.vgg19,
-    'squeezenet' : models.squeezenet1_0(),
-    'densenet' : models.densenet161(),
-    'inception_v3' : models.inception_v3(),
-    'googlenet' : models.googlenet(),
-    'shufflenet' : models.shufflenet_v2_x1_0(),
-    'mobilenet' : models.mobilenet_v2(),
-    'resnext50_32x4d' : models.resnext50_32x4d(),
-    'wide_resnet50_2' : models.wide_resnet50_2(),
-    'mnasnet' : models.mnasnet1_0(),
-    'ghostnet': GhostNet()
+    'resnet18': models.resnet18(pretrained=pretrained),
+    'alexnet' : models.alexnet(pretrained=pretrained),
+    'vgg16_bn': models.vgg16_bn(pretrained=pretrained),
+    'vgg16' : models.vgg16(pretrained=pretrained),
+    'vgg19_bn': models.vgg19_bn(pretrained=pretrained),
+    'vgg19': models.vgg19(pretrained=pretrained),
+    'squeezenet' : models.squeezenet1_0(pretrained=pretrained),
+    'densenet' : models.densenet161(pretrained=pretrained),
+    'inception_v3' : models.inception_v3(pretrained=pretrained),
+    'googlenet' : models.googlenet(pretrained=pretrained),
+    'shufflenet' : models.shufflenet_v2_x1_0(pretrained=pretrained),
+    'mobilenet' : models.mobilenet_v2(pretrained=pretrained),
+    'resnext50_32x4d' : models.resnext50_32x4d(pretrained=pretrained),
+    'wide_resnet50_2' : models.wide_resnet50_2(pretrained=pretrained),
+    'mnasnet' : models.mnasnet1_0(pretrained=pretrained),
     }
 
     return model_dict
