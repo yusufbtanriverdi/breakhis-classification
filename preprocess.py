@@ -33,7 +33,7 @@ class Normalize(object):
         img = torch.transpose(torch.from_numpy(img), 0, -1)
         return img
     
-class Equalize(object):
+class CLAHE(object):
     """Apply CLAHE Equalization to the dataset. """
     def __init__(self, *args, **kwargs):
         # Initialize any required variables or parameters here
@@ -52,11 +52,7 @@ class Equalize(object):
 
         # Apply CLAHE to the L channel 
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-        
         clahe_l_channel = clahe.apply(l_channel)
-
-        print(clahe_l_channel.shape, a_channel.shape, b_channel.shape)
-        print(clahe_l_channel.dtype, a_channel.dtype, b_channel.dtype)
 
         # Merge the processed L channel with the original a and b channels
         clahe_lab_image = cv2.merge((clahe_l_channel, a_channel, b_channel))
@@ -68,6 +64,23 @@ class Equalize(object):
 
         return img
 
+
+class Normalize(object):
+    """Apply brightness normalization to the dataset. """
+
+    def __init__(self, mf='40X', *args, **kwargs):
+        # Initialize any required variables or parameters here
+        self.mf = mf
+        info = pd.read_csv('features\mean.csv', index_col='mf')
+        self.means = np.array(info.loc[mf, :])
+
+    def __call__(self, img, *args, **kwds):
+        img = torch.transpose(img, 0, -1).numpy()
+        img = img - self.means/255
+        img = scale_decimal(img)
+        img = torch.transpose(torch.from_numpy(img), 0, -1)
+        return img
+
 if __name__ == "__main__":
 
     import matplotlib.pyplot as plt
@@ -77,7 +90,7 @@ if __name__ == "__main__":
                 transform=transforms.Compose([
                         transforms.ToTensor(),
                         Normalize(),
-                        Equalize(),
+                        CLAHE(),
                     ]))
     
     print("Size of dataset and samples --> ", len(myEqDataset), myEqDataset[0][0].shape)
