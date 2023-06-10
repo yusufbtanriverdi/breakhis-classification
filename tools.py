@@ -7,7 +7,7 @@ import glob
 from tqdm import tqdm 
 import pandas as pd 
 import os
-
+from PIL import Image
 
 def alter_name(fname):
     fname = fname.split('\\')[-1]
@@ -155,7 +155,7 @@ class BreaKHis(Dataset):
         self.targets = pairs[:, 1]
         self.fnames = pairs[:, -1]
         self.weight = make_weights_for_balanced_classes(pairs, self.nclasses)
-        self.mean = np.mean(pairs[:, 0], axis=0)
+        
         self.imageLikefeatures = imageLikefeatures
         if imageLikefeatures:
             # To make sure it is same size.
@@ -178,7 +178,9 @@ class BreaKHis(Dataset):
         target = self.targets[index]
 
         if self.transform is not None:
-            img = self.transform(img)
+            # Convert NumPy array to PIL image
+            pil_image = Image.fromarray(img)
+            img = self.transform(pil_image)
 
         if self.target_transform is not None:
             target = self.target_transform(target)

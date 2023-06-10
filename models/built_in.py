@@ -76,7 +76,7 @@ def GhostNet():
     return ghostnet 
 
 
-def call_builtin_models(pretrained=True):
+def call_builtin_models(pretrained=True, num_classes=2):
     """
     Returns a dictionary of built-in models. 
 
@@ -111,22 +111,89 @@ def call_builtin_models(pretrained=True):
     std = torch.mean(torch.tensor(stds))
     """
 
-    model_dict = {
-    'resnet18': models.resnet18(pretrained=pretrained),
-    'alexnet' : models.alexnet(pretrained=pretrained),
-    'vgg16_bn': models.vgg16_bn(pretrained=pretrained),
-    'vgg16' : models.vgg16(pretrained=pretrained),
-    'vgg19_bn': models.vgg19_bn(pretrained=pretrained),
-    'vgg19': models.vgg19(pretrained=pretrained),
-    'squeezenet' : models.squeezenet1_0(pretrained=pretrained),
-    'densenet' : models.densenet161(pretrained=pretrained),
-    'inception_v3' : models.inception_v3(pretrained=pretrained),
-    'googlenet' : models.googlenet(pretrained=pretrained),
-    'shufflenet' : models.shufflenet_v2_x1_0(pretrained=pretrained),
-    'mobilenet' : models.mobilenet_v2(pretrained=pretrained),
-    'resnext50_32x4d' : models.resnext50_32x4d(pretrained=pretrained),
-    'wide_resnet50_2' : models.wide_resnet50_2(pretrained=pretrained),
-    'mnasnet' : models.mnasnet1_0(pretrained=pretrained),
+    # model_dict = {
+    # 'resnet18': models.resnet18(pretrained=pretrained),
+    # 'alexnet' : models.alexnet(pretrained=pretrained),
+    # 'vgg16_bn': models.vgg16_bn(pretrained=pretrained),
+    # 'vgg16' : models.vgg16(pretrained=pretrained),
+    # 'vgg19_bn': models.vgg19_bn(pretrained=pretrained),
+    # 'vgg19': models.vgg19(pretrained=pretrained),
+    # 'squeezenet' : models.squeezenet1_0(pretrained=pretrained),
+    # 'densenet' : models.densenet161(pretrained=pretrained),
+    # 'inception_v3' : models.inception_v3(pretrained=pretrained),
+    # 'googlenet' : models.googlenet(pretrained=pretrained),
+    # 'shufflenet' : models.shufflenet_v2_x1_0(pretrained=pretrained),
+    # 'mobilenet' : models.mobilenet_v2(pretrained=pretrained),
+    # 'resnext50_32x4d' : models.resnext50_32x4d(pretrained=pretrained),
+    # 'wide_resnet50_2' : models.wide_resnet50_2(pretrained=pretrained),
+    # 'mnasnet' : models.mnasnet1_0(pretrained=pretrained),
+    # }
+
+    model_names = {
+    'resnet18': 'fc',
+    'alexnet': 'classifier',
+    'vgg16_bn': 'classifier',
+    'vgg16': 'classifier',
+    'vgg19_bn': 'classifier',
+    'vgg19': 'classifier',
+    'squeezenet': 'classifier',
+    'densenet': 'classifier',
+    'inception_v3': 'fc',
+    'googlenet': 'fc',
+    'shufflenet': 'fc',
+    'mobilenet': 'classifier',
+    'resnext50_32x4d': 'fc',
+    'wide_resnet50_2': 'fc',
+    'mnasnet': 'classifier'
     }
+
+    if pretrained:
+        model_dict = {
+            'resnet18': models.resnet18(weights=models.ResNet18_Weights.DEFAULT),
+            'alexnet' : models.alexnet(weights=models.AlexNet_Weights.DEFAULT),
+            'vgg16_bn': models.vgg16_bn(weights=models.VGG16_BN_Weights.DEFAULT),
+            'vgg16' : models.vgg16(weights=models.VGG16_Weights.DEFAULT),
+            'vgg19_bn': models.vgg19_bn(weights=models.VGG19_BN_Weights.DEFAULT),
+            'vgg19': models.vgg19(weights=models.VGG19_Weights.DEFAULT),
+            'squeezenet' : models.squeezenet1_0(weights=models.SqueezeNet1_0_Weights.DEFAULT),
+            'densenet' : models.densenet161(weights=models.DenseNet161_Weights.DEFAULT),
+            'inception_v3' : models.inception_v3(weights=models.Inception_V3_Weights.DEFAULT),
+            'googlenet' : models.googlenet(weights=models.GoogLeNet_Weights.DEFAULT),
+            'shufflenet' : models.shufflenet_v2_x1_0(weights=models.ShuffleNet_V2_X1_0_Weights.DEFAULT),
+            'mobilenet' : models.mobilenet_v2(weights=models.MobileNet_V2_Weights.DEFAULT),
+            'resnext50_32x4d' : models.resnext50_32x4d(weights=models.ResNeXt50_32X4D_Weights.DEFAULT),
+            'wide_resnet50_2' : models.wide_resnet50_2(weights=models.Wide_ResNet50_2_Weights.DEFAULT),
+            'mnasnet' : models.mnasnet1_0(weights=models.MNASNet1_0_Weights.DEFAULT),
+        }
+    else:
+        model_dict = {
+            'resnet18': models.resnet18(weights=None),
+            'alexnet' : models.alexnet(weights=None),
+            'vgg16_bn': models.vgg16_bn(weights=None),
+            'vgg16' : models.vgg16(weights=None),
+            'vgg19_bn': models.vgg19_bn(weights=None),
+            'vgg19': models.vgg19(weights=None),
+            'squeezenet' : models.squeezenet1_0(weights=None),
+            'densenet' : models.densenet161(weights=None),
+            'inception_v3' : models.inception_v3(weights=None),
+            'googlenet' : models.googlenet(weights=None),
+            'shufflenet' : models.shufflenet_v2_x1_0(weights=None),
+            'mobilenet' : models.mobilenet_v2(weights=None),
+            'resnext50_32x4d' : models.resnext50_32x4d(weights=None),
+            'wide_resnet50_2' : models.wide_resnet50_2(weights=None),
+            'mnasnet' : models.mnasnet1_0(weights=None),
+        }
+
+    for model_name, model in model_dict.items():
+        # Get last layer.
+        last_layer_attr = model_names[model_name]
+        last_layer = getattr(model, last_layer_attr)
+
+        if isinstance(last_layer, torch.nn.Linear):
+            num_ftrs = last_layer.in_features
+            setattr(model, last_layer_attr, torch.nn.Linear(num_ftrs, num_classes))
+
+        # Update the last layer.
+        model_dict[model_name] = model
 
     return model_dict
