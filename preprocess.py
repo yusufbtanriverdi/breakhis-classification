@@ -3,6 +3,9 @@ from tools import BreaKHis
 from torchvision import transforms
 import pandas as pd
 import torch
+from PIL import ImageOps, Image
+import cv2
+
 
 def scale_decimal(image):
     image = np.array(image)
@@ -24,38 +27,75 @@ class Normalize(object):
         self.means = np.array(info.loc[mf, :])
 
     def __call__(self, img, *args, **kwds):
-        img = torch.transpose(img, 0, -1)
+        img = torch.transpose(img, 0, -1).numpy()
         img = img - self.means/255
         img = scale_decimal(img)
         img = torch.transpose(torch.from_numpy(img), 0, -1)
         return img
     
+class Equalize(object):
+    """Apply CLAHE Equalization to the dataset. """
+    def __init__(self, *args, **kwargs):
+        # Initialize any required variables or parameters here
+        pass
+
+    def __call__(self, img, *args, **kwds):
+        img = torch.transpose(img, 0, -1).numpy()
+        # Apply CLAHE        
+
+        # Convert the image to Lab color space
+        lab_image = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+
+        # Convert to uint8
+        lab_image = lab_image.astype(np.uint8)
+        # Split the Lab image into L, a, and b channels
+        l_channel, a_channel, b_channel = cv2.split(lab_image)
+
+        # Apply CLAHE to the L channel 
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        
+        clahe_l_channel = clahe.apply(l_channel)
+
+        print(clahe_l_channel.shape, a_channel.shape, b_channel.shape)
+        print(clahe_l_channel.dtype, a_channel.dtype, b_channel.dtype)
+
+        # Merge the processed L channel with the original a and b channels
+        clahe_lab_image = cv2.merge((clahe_l_channel, a_channel, b_channel))
+
+        # Convert the Lab image back to RGB color space
+        clahe_rgb_image = cv2.cvtColor(clahe_lab_image, cv2.COLOR_LAB2BGR)
+
+        return clahe_rgb_image
 
 if __name__ == "__main__":
 
     import matplotlib.pyplot as plt
 
 
-    myNormDataset = BreaKHis(
+    myEqDataset = BreaKHis(
                 transform=transforms.Compose([
                         transforms.ToTensor(),
                         Normalize(),
+                        Equalize(),
+                        transforms.ToTensor(),
                     ]))
+    
+    print("Size of dataset and samples --> ", len(myEqDataset), myEqDataset[0][0].shape)
 
     myDataset = BreaKHis(
                 transform=transforms.Compose([
                         transforms.ToTensor(),
+                        Normalize(),
                     ]))
     
     print("Size of dataset and samples --> ", len(myDataset), myDataset[0][0].shape)
-    print("Size of dataset and samples --> ", len(myNormDataset), myNormDataset[0][0].shape)
 
     fig, axs = plt.subplots(1,2, figsize=(16,16))
 
     axs = axs.ravel()
 
     axs[0].imshow(myDataset[0][0][1, :, :])
-    axs[1].imshow(myNormDataset[0][0][1, : ,:])
+    axs[1].imshow(myEqDataset[0][0][1, : ,:])
     plt.tight_layout()
     plt.show()
 
