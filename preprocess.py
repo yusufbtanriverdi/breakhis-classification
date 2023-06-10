@@ -41,7 +41,6 @@ class Equalize(object):
 
     def __call__(self, img, *args, **kwds):
         img = torch.transpose(img, 0, -1).numpy()
-        # Apply CLAHE        
 
         # Convert the image to Lab color space
         lab_image = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
@@ -65,7 +64,9 @@ class Equalize(object):
         # Convert the Lab image back to RGB color space
         clahe_rgb_image = cv2.cvtColor(clahe_lab_image, cv2.COLOR_LAB2BGR)
 
-        return clahe_rgb_image
+        img = torch.transpose(torch.from_numpy(clahe_rgb_image), 0, -1)
+
+        return img
 
 if __name__ == "__main__":
 
@@ -77,7 +78,6 @@ if __name__ == "__main__":
                         transforms.ToTensor(),
                         Normalize(),
                         Equalize(),
-                        transforms.ToTensor(),
                     ]))
     
     print("Size of dataset and samples --> ", len(myEqDataset), myEqDataset[0][0].shape)
