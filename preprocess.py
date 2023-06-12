@@ -17,8 +17,8 @@ def scale_decimal(image):
         scaled_image[..., c] = scaled_channel
     return scaled_image
 
-class Normalize(object):
-    """Apply brightness normalization to the dataset. """
+class NormalizeByMeanIm(object):
+    """    Apply brightness normalization to the dataset.   """
 
     def __init__(self, mf='40X', *args, **kwargs):
         # Initialize any required variables or parameters here
@@ -34,7 +34,7 @@ class Normalize(object):
         return img
     
 class CLAHE(object):
-    """Apply CLAHE Equalization to the dataset. """
+    """     Apply CLAHE Equalization to the dataset.    """
     def __init__(self, *args, **kwargs):
         # Initialize any required variables or parameters here
         pass
@@ -65,31 +65,14 @@ class CLAHE(object):
         return img
 
 
-class Normalize(object):
-    """Apply brightness normalization to the dataset. """
-
-    def __init__(self, mf='40X', *args, **kwargs):
-        # Initialize any required variables or parameters here
-        self.mf = mf
-        info = pd.read_csv('features\mean.csv', index_col='mf')
-        self.means = np.array(info.loc[mf, :])
-
-    def __call__(self, img, *args, **kwds):
-        img = torch.transpose(img, 0, -1).numpy()
-        img = img - self.means/255
-        img = scale_decimal(img)
-        img = torch.transpose(torch.from_numpy(img), 0, -1)
-        return img
-
 if __name__ == "__main__":
 
     import matplotlib.pyplot as plt
 
-
     myEqDataset = BreaKHis(
                 transform=transforms.Compose([
                         transforms.ToTensor(),
-                        Normalize(),
+                        NormalizeByMeanIm(),
                         CLAHE(),
                     ]))
     
@@ -98,7 +81,7 @@ if __name__ == "__main__":
     myDataset = BreaKHis(
                 transform=transforms.Compose([
                         transforms.ToTensor(),
-                        Normalize(),
+                        NormalizeByMeanIm(),
                     ]))
     
     print("Size of dataset and samples --> ", len(myDataset), myDataset[0][0].shape)

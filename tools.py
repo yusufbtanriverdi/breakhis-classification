@@ -8,6 +8,24 @@ from tqdm import tqdm
 import pandas as pd 
 import os
 from PIL import Image
+import matplotlib.pyplot as plt
+
+def plot(imgs, orig_imgs, row_title='Transformed Image', **imshow_kwargs):
+    num_rows = len(imgs)
+    num_cols = 2
+
+    fig, axs = plt.subplots(nrows=num_rows, ncols=num_cols, squeeze=False)
+    for row_idx, row in enumerate(imgs):
+        ax = axs[row_idx, 0]
+        ax.imshow(np.asarray(row), **imshow_kwargs)
+        ax.set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
+        ax = axs[row_idx, 1]
+        ax.imshow(np.transpose(orig_imgs[row_idx], (1, 0, -1)), **imshow_kwargs)
+        ax.set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
+
+    plt.tight_layout()
+    plt.show()
+
 
 def alter_name(fname):
     fname = fname.split('\\')[-1]
@@ -154,7 +172,7 @@ class BreaKHis(Dataset):
         self.images = np.array([image for image in pairs[:, 0]])    
         self.targets = pairs[:, 1]
         self.fnames = pairs[:, -1]
-        self.weight = make_weights_for_balanced_classes(pairs, self.nclasses)
+        # self.weight = make_weights_for_balanced_classes(pairs, self.nclasses)
         
         self.imageLikefeatures = imageLikefeatures
         if imageLikefeatures:
