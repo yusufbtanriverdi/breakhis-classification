@@ -197,8 +197,8 @@ class BreaKHis(Dataset):
 
         if self.transform is not None:
             # Convert NumPy array to PIL image
-            pil_image = Image.fromarray(img)
-            img = self.transform(pil_image)
+            # img = Image.fromarray(img)
+            img = self.transform(img)
 
         if self.target_transform is not None:
             target = self.target_transform(target)

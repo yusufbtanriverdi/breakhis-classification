@@ -41,15 +41,18 @@ def set_loaders(myDataset, seed=42, test_split=0.3, bs=16):
     # training_sampler = WeightedRandomSampler(weights, len(weights), replacement=False)                     
     train_loader = torch.utils.data.DataLoader(training_data, 
                                                batch_size=BATCH_SIZE, 
-                                               pin_memory=True,
-                                               shuffle = True
+                                               pin_memory=False,
+                                               shuffle = True,
+                                               num_workers=0
                                                )   
     
     # weights = torch.DoubleTensor(test_data.dataset.weight)                                       
     # test_sampler = WeightedRandomSampler(weights, len(weights), replacement=False)    
     test_loader = torch.utils.data.DataLoader(test_data, 
                                               batch_size=BATCH_SIZE, 
-                                              pin_memory=True)   
+                                              pin_memory=False,
+                                              num_workers=0
+                                              )   
     
     print("Length of loaders ---> \n",
         len(train_loader), len(train_loader.dataset), "\n",
@@ -72,11 +75,25 @@ def read_means_and_stds(mf):
 
     return np.array(info_means.loc[mf, :]), np.array(info_stdes.loc[mf, :])
 
+def to_device(data_loader, device):
+    for batch in data_loader:
+        if isinstance(batch, torch.Tensor):
+            batch = batch.to(device)
+        elif isinstance(batch, (list, tuple)):
+            batch = [to_device(b, device) for b in batch]
+        yield batch
+
 
 if __name__ == '__main__':
 
+    import torch.multiprocessing as mp
+    mp.set_start_method("spawn")
     # For reproducibility.
     torch.manual_seed(17)
+
+    # Set the device.
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(device)
 
     mf = '40X'
     mean_per_ch, std_per_ch = read_means_and_stds(mf = mf)
@@ -86,16 +103,15 @@ if __name__ == '__main__':
     print("Hello User! Dataset is loading....")
     startTime = time.time()
     myDataset = BreaKHis(
-                    transform=T.Compose(
-        [ 
-            # For built-in models standardized by their mean.
-            T.Normalize(mean = mean_per_ch,
-                        std = std_per_ch),
-            # For built-in models resize.
-            T.Resize(256), T.CenterCrop(224), 
-            T.ToTensor(),
-            ]),
-                    mf = mf, mode = 'binary'
+                    transform = T.Compose([
+                    T.ToPILImage(),  # Convert numpy.ndarray to PIL Image
+                    T.Resize(256),
+                    T.CenterCrop(224),
+                    T.ToTensor(),
+                    T.Normalize(mean=mean_per_ch, std=std_per_ch)
+                ]),
+                    mf = mf, 
+                    mode = 'binary'
                     )
     
     print("Elapsed time in min: ", (time.time() - startTime)/60)
@@ -104,19 +120,26 @@ if __name__ == '__main__':
 
     
     # Augmentation 
-    elastic_transformer = T.Compose(
-        [T.ToPILImage(),
-         T.ElasticTransform(alpha=100.0), 
-         T.ToTensor() ] )
+    elastic_transformer = T.Compose([
+    T.ToPILImage(),
+    T.ElasticTransform(alpha=100.0),
+    T.ToTensor()
+    ])
     
     orig_imgs = myDataset.images
 
-    print(len(orig_imgs))
+    num_images_to_t = 500
+    transformed_imgs = [torch.transpose(elastic_transformer(orig_img), 0, -1).numpy().astype(np.uint8) for orig_img in tqdm(orig_imgs[:num_images_to_t])]
+    print(transformed_imgs[0].dtype, orig_imgs[0].dtype)
 
-    transformed_imgs = [torch.transpose(elastic_transformer(orig_img), 0, -1).numpy() for orig_img in tqdm(orig_imgs[:500])]
     myDataset.images = np.concatenate([np.transpose(myDataset.images, (0, 2, 1, -1)), transformed_imgs])
-    myDataset.targets = np.concatenate([myDataset.targets, myDataset.targets])
-    myDataset.fnames = np.concatenate([myDataset.fnames, myDataset.fnames])
+    print(myDataset.images[0].dtype)
+
+    del transformed_imgs
+    del orig_imgs
+
+    myDataset.targets = np.concatenate([myDataset.targets, myDataset.targets[:num_images_to_t]])
+    myDataset.fnames = np.concatenate([myDataset.fnames, myDataset.fnames[:num_images_to_t]])
 
     train_loader, test_loader = set_loaders(
     myDataset,
@@ -124,15 +147,20 @@ if __name__ == '__main__':
     test_split=0.3, 
     bs=16)
 
-    print((len(train_loader) + len(test_loader))*16)
+    del myDataset
+
+    # train_loader = to_device(train_loader, device)  # Move the train loader to the GPU if available
+    # test_loader = to_device(test_loader, device)  # Move the test loader to the GPU if available
+
     # plot(transformed_imgs, orig_imgs[:2])
 
-    models = call_builtin_models(pretrained=True)
+    model = list(call_builtin_models(pretrained=True).values())[0]
 
-    for model in models.values()[:2]:
-        optimizer = optim.SGD(model.parameters(),
-                      lr=0.01,
-                      momentum=0.9,
-                      weight_decay=0.0001)
-        
-        eval(model, test_loader, train_loader, optimizer, criterion)
+    #for model in list(models.values())[:1]:
+    model = model.to(device)  # Move the model to the GPU   
+    optimizer = optim.SGD(model.parameters(),
+                    lr=0.01,
+                    momentum=0.9,
+                    weight_decay=0.0001)
+
+    eval(model, test_loader, train_loader, optimizer, criterion, device, num_epochs=100)
