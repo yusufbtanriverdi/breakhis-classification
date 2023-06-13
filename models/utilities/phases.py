@@ -53,8 +53,9 @@ def train(model, train_loader, optimizer, criterion, eval_metrics, device, epoch
                 
                 metric_values[metric_name].append(metric_val.item())
         if batch % 10 == 0:
-            print(f"loss: {loss:>7f}, average loss: {average_loss/len(train_loader):>5f}")
-
+            #  print(f"loss: {loss:>7f}, average loss: {average_loss/len(train_loader):>5f}")
+            pass
+        
     average_loss /= len(train_loader)
     epoch_scores = {
         'Epoch': epoch + 1,
@@ -146,8 +147,8 @@ def eval(model, test_loader, train_loader, optimizer, criterion, device, num_epo
     # Convert the date to a string
     date_string = current_date.strftime("%Y-%m-%d")
 
-    train_df.to_csv(f'models/results/train/{model_name}_{date_string}.csv', index=False)
-    test_df.to_csv(f'models/results/test/{model_name}_{date_string}.csv', index=False)
+    train_df.to_csv(f'models/results/train/{model_name}_{date_string}_noaug.csv', index=False)
+    test_df.to_csv(f'models/results/test/{model_name}_{date_string}_noaug.csv', index=False)
 
     print(model_name, "Done!")
     # TODO: Save results in a csv. 

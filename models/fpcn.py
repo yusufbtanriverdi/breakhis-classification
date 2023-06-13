@@ -104,10 +104,10 @@ class SubNet(nn.Module):
         return x
 
 
-class RetinaNet(nn.Module):
+class FPCN(nn.Module):
 
     def __init__(self, num_classes, backbone=resnet50_features, use_pretrained=False):
-        super(RetinaNet, self).__init__()
+        super(FPCN, self).__init__()
         self.num_classes = num_classes
 
         _resnet = backbone(pretrained=use_pretrained)
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     import time
     import torchvision.datasets as dset
 
-    net = RetinaNet(num_classes=10)
+    net = FPCN(num_classes=10)
     # For first time downloading.
     # cifar10 = dset.CIFAR10("data/cifar10/", download=True)
     cifar10 = dset.CIFAR10("data/cifar10/", download=False)

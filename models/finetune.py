@@ -9,8 +9,8 @@ from torch.utils.data import WeightedRandomSampler, random_split, RandomSampler
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import time
+from models.fpcn import FPCN
 from models.utilities.losses import FocalLoss
-from models.retinanet import RetinaNet
 from utilities.phases import *
 import os, sys
 import warnings 
@@ -20,6 +20,7 @@ parent_dir = os.path.abspath(os.path.join(os.getcwd(), "."))
 sys.path.append(parent_dir)
 
 from tools import BreaKHis, plot
+
 
 def set_loaders(myDataset, seed=42, test_split=0.3, bs=16):
     generator = torch.Generator().manual_seed(seed)
@@ -97,8 +98,6 @@ if __name__ == '__main__':
 
     mf = '40X'
     mean_per_ch, std_per_ch = read_means_and_stds(mf = mf)
-    # criterion = FocalLoss(2)
-    criterion = nn.CrossEntropyLoss()
 
     print("Hello User! Dataset is loading....")
     startTime = time.time()
@@ -128,18 +127,20 @@ if __name__ == '__main__':
     
     orig_imgs = myDataset.images
 
-    num_images_to_t = 500
+    num_images_to_t = 0
     transformed_imgs = [torch.transpose(elastic_transformer(orig_img), 0, -1).numpy().astype(np.uint8) for orig_img in tqdm(orig_imgs[:num_images_to_t])]
-    print(transformed_imgs[0].dtype, orig_imgs[0].dtype)
+    # print(transformed_imgs[0].dtype, orig_imgs[0].dtype)
 
-    myDataset.images = np.concatenate([np.transpose(myDataset.images, (0, 2, 1, -1)), transformed_imgs])
-    print(myDataset.images[0].dtype)
+    if num_images_to_t != 0:
+        myDataset.images = np.concatenate([np.transpose(myDataset.images, (0, 2, 1, -1)), transformed_imgs])
+    # print(myDataset.images[0].dtype)
 
     del transformed_imgs
     del orig_imgs
 
-    myDataset.targets = np.concatenate([myDataset.targets, myDataset.targets[:num_images_to_t]])
-    myDataset.fnames = np.concatenate([myDataset.fnames, myDataset.fnames[:num_images_to_t]])
+    if num_images_to_t != 0:
+        myDataset.targets = np.concatenate([myDataset.targets, myDataset.targets[:num_images_to_t]])
+        myDataset.fnames = np.concatenate([myDataset.fnames, myDataset.fnames[:num_images_to_t]])
 
     train_loader, test_loader = set_loaders(
     myDataset,
@@ -154,13 +155,20 @@ if __name__ == '__main__':
 
     # plot(transformed_imgs, orig_imgs[:2])
 
-    model = list(call_builtin_models(pretrained=True).values())[0]
+    # Choose from list.
+    # model = list(call_builtin_models(pretrained=True).values())[0]
 
+    # Call spesifically.
+    model = FPCN(2, use_pretrained=True)
     #for model in list(models.values())[:1]:
     model = model.to(device)  # Move the model to the GPU   
+
+        # criterion = FocalLoss(2)
+    criterion = nn.CrossEntropyLoss()
+
     optimizer = optim.SGD(model.parameters(),
                     lr=0.01,
                     momentum=0.9,
                     weight_decay=0.0001)
 
-    eval(model, test_loader, train_loader, optimizer, criterion, device, num_epochs=100)
+    eval(model, test_loader, train_loader, optimizer, criterion, device, num_epochs=50)

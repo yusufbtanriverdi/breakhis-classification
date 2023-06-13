@@ -1,4 +1,5 @@
 from torchvision.models.resnet import BasicBlock, Bottleneck, ResNet
+from torch.hub import load_state_dict_from_url
 
 # Source: https://github.com/c0nn3r/RetinaNet/blob/master/resnet_features.py 
 
@@ -95,7 +96,6 @@ model_urls = {
     'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
 }
 
-model_dirs = {}
 
 def resnet18_features(pretrained=False, **kwargs):
     '''Constructs a ResNet-18 model.
@@ -105,7 +105,9 @@ def resnet18_features(pretrained=False, **kwargs):
     model = ResNetFeatures(BasicBlockFeatures, [2, 2, 2, 2], **kwargs)
 
     if pretrained:
-        model.load_state_dict(model_dirs['resnet18'])
+        checkpoint = model_urls['resnet18']
+        state_dict = load_state_dict_from_url(checkpoint, progress=True, check_hash=True)
+        model.load_state_dict(state_dict)
 
     return model
 
@@ -118,8 +120,10 @@ def resnet34_features(pretrained=False, **kwargs):
     model = ResNetFeatures(BasicBlockFeatures, [3, 4, 6, 3], **kwargs)
 
     if pretrained:
-        model.load_state_dict(model_dirs['resnet34'])
-    
+        checkpoint = model_urls['resnet34']
+        state_dict = load_state_dict_from_url(checkpoint, progress=True, check_hash=True)
+        model.load_state_dict(state_dict)   
+
     return model
 
 
@@ -131,7 +135,9 @@ def resnet50_features(pretrained=False, **kwargs):
     model = ResNetFeatures(BottleneckFeatures, [3, 4, 6, 3], **kwargs)
 
     if pretrained:
-        model.load_state_dict(model_dirs['resnet50'])
+        checkpoint = model_urls['resnet50']
+        state_dict = load_state_dict_from_url(checkpoint, progress=True, check_hash=True)
+        model.load_state_dict(state_dict)
     
     return model
 
@@ -144,8 +150,10 @@ def resnet101_features(pretrained=False, **kwargs):
     model = ResNetFeatures(BottleneckFeatures, [3, 4, 23, 3], **kwargs)
 
     if pretrained:
-        model.load_state_dict(model_dirs['resnet101'])
-
+        checkpoint = model_urls['resnet101']
+        state_dict = load_state_dict_from_url(checkpoint, progress=True, check_hash=True)
+        model.load_state_dict(state_dict)
+        
     return model
 
 
@@ -157,6 +165,8 @@ def resnet152_features(pretrained=False, **kwargs):
     model = ResNetFeatures(BottleneckFeatures, [3, 8, 36, 3], num_classes=2, **kwargs)
 
     if pretrained:
-        model.load_state_dict(model_dirs['resnet152'])
+        checkpoint = model_urls['resnet152']
+        state_dict = load_state_dict_from_url(checkpoint, progress=True, check_hash=True)
+        model.load_state_dict(state_dict)
 
-    return 
+    return model
