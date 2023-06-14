@@ -113,15 +113,13 @@ def test(model, test_loader, criterion, eval_metrics, device, epoch=-1, mode='bi
     print(epoch_scores)
     return epoch_scores
 
-def eval(model, test_loader, train_loader, optimizer, criterion, device, num_epochs= 1, mode='binary', model_name=None):
+def eval(model, test_loader, train_loader, optimizer, criterion, device, num_epochs= 1, mode='binary', model_name=None, mf='40X'):
 
     eval_metrics = {
     'accuracy_score': Accuracy(task=mode).to(device),
     'roc_auc_score': AUROC(task=mode).to(device),
     'average_precision_score' : AveragePrecision(task=mode).to(device),
-    'mean_absolute_percentage_error' : MeanAbsolutePercentageError().to(device),
     'f1_score' : F1Score(mode).to(device),
-    'r2_score' : R2Score().to(device),
     'recall_Score' : Recall(mode).to(device),
     'cohen_kappa_score' : CohenKappa(mode).to(device)
     }
@@ -148,8 +146,8 @@ def eval(model, test_loader, train_loader, optimizer, criterion, device, num_epo
     # Convert the date to a string
     date_string = current_date.strftime("%Y-%m-%d")
 
-    train_df.to_csv(f'models/results/train/{model_name}_{date_string}_noaug.csv', index=False)
-    test_df.to_csv(f'models/results/test/{model_name}_{date_string}_noaug.csv', index=False)
+    train_df.to_csv(f'models/results/{mf}/train/{model_name}_{date_string}_noaug.csv', index=False)
+    test_df.to_csv(f'models/results/{mf}/test/{model_name}_{date_string}_noaug.csv', index=False)
 
     print(model_name, "Done!")
     # TODO: Save results in a csv. 

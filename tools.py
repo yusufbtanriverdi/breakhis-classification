@@ -69,7 +69,7 @@ def read_images(path_arr, label, imsize=None):
     
     return resized_images
 
-def read_imageLikefeature(extractor, fnames, root='./features/all/', mode='binary', mf='40X'):
+def read_imageLikefeature(extractor, fnames, root='C:/Users/user/Dersler/Machine and Deep Learning/Project/breast_histopathology_clf/features/all/', mode='binary', mf='40X'):
     feature_dir = os.path.join(root, mode, mf, 'imagelike', extractor)
     path = feature_dir + f'/*/*.png'
     path_arr = glob.glob(path)

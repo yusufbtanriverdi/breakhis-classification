@@ -192,13 +192,16 @@ def call_builtin_models(pretrained=True, num_classes=2, num_channels=3):
 
     if num_channels != 3:
         for model_name, model in model_dict.items():
-            if model_name in ['resnet18', 'resnext50_32x4d', 'wide_resnet50_2']:
+            if model_name in ['resnet18', 'resnext50_32x4d', 'wide_resnet50_2']: # ++, ??, ??
                 model.conv1.in_channels = num_channels
                 model.conv1.weight.data = init_weights_default(num_channels=num_channels)
             elif model_name in ['alexnet', 'vgg16_bn', 'vgg19_bn', 'vgg19', 'vgg16', 'densenet', 'squeezenet']:
                 model.features[0].in_channels = num_channels
                 model.features[0].weight.data = init_weights_default(num_channels=num_channels)
-            elif model_name in ['mnasnet']:
+            elif model_name in ['mobilenet']: # --
+                model.features[0][0].in_channels = num_channels
+                model.features[0][0].weight.data = init_weights_default(num_channels=num_channels)
+            elif model_name in ['mnasnet']: # --
                 model.layers[0].in_channels = num_channels
                 model.layers[0].weight.data = init_weights_default(num_channels=num_channels)
             elif model_name == 'shufflenet':

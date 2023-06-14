@@ -35,10 +35,10 @@ def visualize_metrics(train_data, test_data, epochs_lim=100, metric= 'Average Lo
 
 if __name__ == '__main__':
     # Read train and test data from CSV files
-    train_data = pd.read_csv('models/results/train/resnet18-hog_2023-06-14_noaug.csv')
-    test_data = pd.read_csv('models/results/test/resnet18-hog_2023-06-14_noaug.csv')
+    train_data = pd.read_csv('models/results/40X/train/resnet18-rgb_2023-06-14_noaug.csv')
+    test_data = pd.read_csv('models/results/40X/test/resnet18-rgb_2023-06-14_noaug.csv')
 
     # plot_epochs(train_data, test_data, epochs_lim=50, metric='roc_auc_score')
-    visualize_metrics(train_data, test_data, epochs_lim=50, metric='Average Loss')
+    visualize_metrics(train_data, test_data, epochs_lim=50, metric='roc_auc_score')
 
     plt.show()

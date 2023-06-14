@@ -108,10 +108,11 @@ if __name__ == '__main__':
                     T.Resize(256),
                     T.CenterCrop(224),
                     T.ToTensor(),
-                    # T.Normalize(mean=np.concatenate([mean_per_ch, [1]]), std=np.concatenate([std_per_ch, [0]]))
+                    T.Normalize(mean=mean_per_ch[:-1], std=std_per_ch[:-1])
                 ]),
                     mode = 'binary',
-                    imageLikefeatures = ['hog']
+                    mf=mf,
+                    imageLikefeatures = None
                     )
     
     print("Elapsed time in min: ", (time.time() - startTime)/60)
@@ -158,7 +159,7 @@ if __name__ == '__main__':
     # plot(transformed_imgs, orig_imgs[:2])
 
     # Choose from list.
-    model_name, model = list(call_builtin_models(pretrained=False, num_channels=4).items())[-4]
+    model_name, model = list(call_builtin_models(pretrained=False, num_channels=3).items())[-2]
     # Call spesifically.
     # model = FPCN(2, use_pretrained=True)
     #for model in list(models.values())[:1]:
@@ -171,4 +172,4 @@ if __name__ == '__main__':
                     lr=0.01,
                     weight_decay=0.0001)
 
-    eval(model, test_loader, train_loader, optimizer, criterion, device, num_epochs=50, model_name=f"{model_name}-hog")
+    eval(model, test_loader, train_loader, optimizer, criterion, device, num_epochs=50, model_name=f"{model_name}-hog", mf=mf)
