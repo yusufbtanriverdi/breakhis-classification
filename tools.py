@@ -73,6 +73,7 @@ def read_imageLikefeature(extractor, fnames, root='./features/all/', mode='binar
     feature_dir = os.path.join(root, mode, mf, 'imagelike', extractor)
     path = feature_dir + f'/*/*.png'
     path_arr = glob.glob(path)
+    print(feature_dir)
     features = []
     for filename in tqdm(path_arr, desc=extractor):
         fname = alter_name(filename)
@@ -114,7 +115,7 @@ def make_weights_for_balanced_classes(pairs, nclasses):
 def conc(images, imageLikeFeatures, different_sizes=False):
     # Assume that the order is the same.
     if different_sizes:
-        print("??")
+        print(images.shape, imageLikeFeatures.shape)
         # Find the minimum size.
         min_height = min(images.shape[1], imageLikeFeatures.shape[1])
         min_width = min(images.shape[2], imageLikeFeatures.shape[2])
@@ -178,7 +179,7 @@ class BreaKHis(Dataset):
         if imageLikefeatures:
             # To make sure it is same size.
             for i, imageLikefeature in enumerate(imageLikefeatures):
-                features = read_imageLikefeature(imageLikefeature[0], self.fnames)
+                features = read_imageLikefeature(imageLikefeature, self.fnames)
                 self.images = conc(self.images, features, different_sizes=True)
 
     def __len__(self):

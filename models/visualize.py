@@ -15,8 +15,6 @@ def plot_epochs(train_data, test_data, epochs_lim=100, metric='Average Loss'):
     ax.set_title(f'{metric} over Epochs')
     ax.legend()
     
-    plt.show()
-
 
 def visualize_metrics(train_data, test_data, epochs_lim=100, metric= 'Average Loss'):
     sns.set(style='darkgrid')
@@ -33,13 +31,14 @@ def visualize_metrics(train_data, test_data, epochs_lim=100, metric= 'Average Lo
     ax.set_title(f'{metric} over Epochs')
     ax.legend()
     
-    plt.show()
 
 
 if __name__ == '__main__':
     # Read train and test data from CSV files
-    train_data = pd.read_csv('models/results/train/ResNet_2023-06-13_noaug.csv')
-    test_data = pd.read_csv('models/results/test/ResNet_2023-06-13_noaug.csv')
+    train_data = pd.read_csv('models/results/train/resnet18-hog_2023-06-14_noaug.csv')
+    test_data = pd.read_csv('models/results/test/resnet18-hog_2023-06-14_noaug.csv')
 
     # plot_epochs(train_data, test_data, epochs_lim=50, metric='roc_auc_score')
-    visualize_metrics(train_data, test_data, epochs_lim=50, metric='roc_auc_score')
+    visualize_metrics(train_data, test_data, epochs_lim=50, metric='Average Loss')
+
+    plt.show()

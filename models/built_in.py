@@ -10,6 +10,11 @@ from tools import BreaKHis
 
 # from torch hub...
 
+def init_weights_default(num_channels):
+    # Define a simple convolutional layer
+    conv = torch.nn.Conv2d(num_channels, 64, kernel_size=3, stride=1, padding=1)
+    return conv.weight.data
+
 def normalize_data_for_builtin(root='D:\\BreaKHis_v1\\', mf='40X', mode='binary'):
 
     transform = T.Compose([T.Resize(256), T.CenterCrop(224), T.ToTensor()])
@@ -76,7 +81,7 @@ def GhostNet():
     return ghostnet 
 
 
-def call_builtin_models(pretrained=True, num_classes=2):
+def call_builtin_models(pretrained=True, num_classes=2, num_channels=3):
     """
     Returns a dictionary of built-in models. 
 
@@ -167,22 +172,47 @@ def call_builtin_models(pretrained=True, num_classes=2):
         }
     else:
         model_dict = {
-            'resnet18': models.resnet18(weights=None),
-            'alexnet' : models.alexnet(weights=None),
-            'vgg16_bn': models.vgg16_bn(weights=None),
-            'vgg16' : models.vgg16(weights=None),
-            'vgg19_bn': models.vgg19_bn(weights=None),
-            'vgg19': models.vgg19(weights=None),
-            'squeezenet' : models.squeezenet1_0(weights=None),
-            'densenet' : models.densenet161(weights=None),
-            'inception_v3' : models.inception_v3(weights=None),
-            'googlenet' : models.googlenet(weights=None),
-            'shufflenet' : models.shufflenet_v2_x1_0(weights=None),
-            'mobilenet' : models.mobilenet_v2(weights=None),
-            'resnext50_32x4d' : models.resnext50_32x4d(weights=None),
-            'wide_resnet50_2' : models.wide_resnet50_2(weights=None),
-            'mnasnet' : models.mnasnet1_0(weights=None),
+            'resnet18': models.resnet18(weights=None), # ++ 
+            'alexnet' : models.alexnet(weights=None), # Error
+            'vgg16_bn': models.vgg16_bn(weights=None), # Memory
+            'vgg16' : models.vgg16(weights=None), 
+            'vgg19_bn': models.vgg19_bn(weights=None), # Memory
+            'vgg19': models.vgg19(weights=None), 
+            'squeezenet' : models.squeezenet1_0(weights=None), # 
+            'densenet' : models.densenet161(weights=None), # 
+            'inception_v3' : models.inception_v3(weights=None), # 
+            'googlenet' : models.googlenet(weights=None), # 
+            'shufflenet' : models.shufflenet_v2_x1_0(weights=None), # 
+            'mobilenet' : models.mobilenet_v2(weights=None), # ++
+            'resnext50_32x4d' : models.resnext50_32x4d(weights=None), # 
+            'wide_resnet50_2' : models.wide_resnet50_2(weights=None), # ++ (32bs = memory error)
+            'mnasnet' : models.mnasnet1_0(weights=None), # ++
         }
+            
+
+    if num_channels != 3:
+        for model_name, model in model_dict.items():
+            if model_name in ['resnet18', 'resnext50_32x4d', 'wide_resnet50_2']:
+                model.conv1.in_channels = num_channels
+                model.conv1.weight.data = init_weights_default(num_channels=num_channels)
+            elif model_name in ['alexnet', 'vgg16_bn', 'vgg19_bn', 'vgg19', 'vgg16', 'densenet', 'squeezenet']:
+                model.features[0].in_channels = num_channels
+                model.features[0].weight.data = init_weights_default(num_channels=num_channels)
+            elif model_name in ['mnasnet']:
+                model.layers[0].in_channels = num_channels
+                model.layers[0].weight.data = init_weights_default(num_channels=num_channels)
+            elif model_name == 'shufflenet':
+                model.conv1[0].in_channels = 4
+                model.conv1[0].weight.data = init_weights_default(num_channels=num_channels)
+            elif model_name == 'inception_v3':
+                model.Conv2d_1a_3x3.conv.in_channels = 4
+                model.Conv2d_1a_3x3.conv.weight.data = init_weights_default(num_channels=num_channels)
+            elif model_name == 'googlenet':
+                model.conv1.conv.in_channels = 4
+                model.conv1.conv.weight.data = init_weights_default(num_channels=num_channels)
+
+        # Update the dictionary.
+        model_dict[model_name] = model
 
     for model_name, model in model_dict.items():
         # Get last layer.
@@ -192,7 +222,17 @@ def call_builtin_models(pretrained=True, num_classes=2):
         if isinstance(last_layer, torch.nn.Linear):
             num_ftrs = last_layer.in_features
             setattr(model, last_layer_attr, torch.nn.Linear(num_ftrs, num_classes))
-
+        elif isinstance(last_layer, torch.nn.Sequential):
+            if model_name != 'squeezenet':
+                last_layer_ = last_layer[-1]
+                num_ftrs = last_layer_.in_features
+                model.classifier[-1] = torch.nn.Linear(num_ftrs, num_classes)
+            else:
+                last_layer = model.classifier
+                last_layer_ = last_layer[1]
+                num_ftrs = last_layer_.in_channels
+                kernel_size = last_layer_.kernel_size
+                model.classifier[1] = torch.nn.Conv2d(num_ftrs, num_classes, kernel_size)
         # Update the last layer.
         model_dict[model_name] = model
 

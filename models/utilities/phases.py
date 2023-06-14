@@ -55,7 +55,7 @@ def train(model, train_loader, optimizer, criterion, eval_metrics, device, epoch
         if batch % 10 == 0:
             #  print(f"loss: {loss:>7f}, average loss: {average_loss/len(train_loader):>5f}")
             pass
-        
+
     average_loss /= len(train_loader)
     epoch_scores = {
         'Epoch': epoch + 1,
@@ -113,7 +113,7 @@ def test(model, test_loader, criterion, eval_metrics, device, epoch=-1, mode='bi
     print(epoch_scores)
     return epoch_scores
 
-def eval(model, test_loader, train_loader, optimizer, criterion, device, num_epochs= 1, mode='binary'):
+def eval(model, test_loader, train_loader, optimizer, criterion, device, num_epochs= 1, mode='binary', model_name=None):
 
     eval_metrics = {
     'accuracy_score': Accuracy(task=mode).to(device),
@@ -139,7 +139,8 @@ def eval(model, test_loader, train_loader, optimizer, criterion, device, num_epo
             test_df = pd.concat([test_df, pd.DataFrame(test_scores, index=[0])])
     
     # Save the DataFrame as a CSV file
-    model_name = model.__class__.__name__
+    if not model_name:
+        model_name = model.__class__.__name__
 
     # Get the current date
     current_date = datetime.date.today()

@@ -142,6 +142,7 @@ if __name__ == '__main__':
         myDataset.targets = np.concatenate([myDataset.targets, myDataset.targets[:num_images_to_t]])
         myDataset.fnames = np.concatenate([myDataset.fnames, myDataset.fnames[:num_images_to_t]])
 
+    print(np.unique(myDataset.targets, return_counts=True))
     train_loader, test_loader = set_loaders(
     myDataset,
     seed=42, 
@@ -156,10 +157,10 @@ if __name__ == '__main__':
     # plot(transformed_imgs, orig_imgs[:2])
 
     # Choose from list.
-    # model = list(call_builtin_models(pretrained=True).values())[0]
+    model_name, model = list(call_builtin_models(pretrained=True).items())[-4]
 
     # Call spesifically.
-    model = FPCN(2, use_pretrained=True)
+    # model = FPCN(2, use_pretrained=True)
     #for model in list(models.values())[:1]:
     model = model.to(device)  # Move the model to the GPU   
 
@@ -168,7 +169,6 @@ if __name__ == '__main__':
 
     optimizer = optim.SGD(model.parameters(),
                     lr=0.01,
-                    momentum=0.9,
                     weight_decay=0.0001)
 
-    eval(model, test_loader, train_loader, optimizer, criterion, device, num_epochs=50)
+    eval(model, test_loader, train_loader, optimizer, criterion, device, num_epochs=50, model_name=model_name)
