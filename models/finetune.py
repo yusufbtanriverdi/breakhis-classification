@@ -3,9 +3,8 @@ import torch
 import torch.nn as nn
 from torch import optim
 from torchvision import transforms as T
-from torch.autograd import Variable
 from torch.optim import lr_scheduler
-from torch.utils.data import WeightedRandomSampler, random_split, RandomSampler
+from torch.utils.data import Subset
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import time
@@ -14,6 +13,8 @@ from models.utilities.losses import FocalLoss
 from utilities.phases import *
 import os, sys
 import warnings 
+from sklearn.model_selection import StratifiedShuffleSplit
+from torch import random
 
 parent_dir = os.path.abspath(os.path.join(os.getcwd(), "."))
 # Add the parent directory to the Python path
@@ -22,10 +23,22 @@ sys.path.append(parent_dir)
 from tools import BreaKHis, plot
 
 
-def set_loaders(myDataset, seed=42, test_split=0.3, bs=16):
-    generator = torch.Generator().manual_seed(seed)
+def set_loaders(myDataset, seed=42, test_split=0.3, bs=16, test_weights=None):
+    
 
-    training_data, test_data = random_split(myDataset, [1-test_split, test_split], generator=generator)
+    # Assuming you have your dataset object named 'myDataset' and the desired test split ratio
+    # Get the class labels and total number of samples from your dataset
+    class_labels = myDataset.targets
+    total_samples = len(myDataset)
+
+    # Perform stratified shuffle split
+    splitter = StratifiedShuffleSplit(n_splits=1, test_size=test_split, random_state=seed)
+    train_indices, test_indices = next(splitter.split(range(total_samples), class_labels))
+
+    training_data = Subset(myDataset, train_indices)
+    test_data = Subset(myDataset, test_indices)
+
+    # training_data, test_data = random_split(myDataset, [1-test_split, test_split], generator=generator)
     print("Dataset is split for training, validation and test phases --> \n",
             "training:", len(training_data), "\n",
             "test:", (len(test_data)), "\n"
@@ -48,17 +61,24 @@ def set_loaders(myDataset, seed=42, test_split=0.3, bs=16):
                                                )   
     
     # weights = torch.DoubleTensor(test_data.dataset.weight)                                       
-    # test_sampler = WeightedRandomSampler(weights, len(weights), replacement=False)    
+    # test_sampler = WeightedRandomSampler(test_weights, BATCH_SIZE, replacement=True)   #  makes only one class:()
     test_loader = torch.utils.data.DataLoader(test_data, 
                                               batch_size=BATCH_SIZE, 
                                               pin_memory=False,
-                                              num_workers=0
+                                              num_workers=0,
+                                              # sampler = test_sampler
                                               )   
     
-    print("Length of loaders ---> \n",
+    print("Length of loaders and class distributions---> \n",
         len(train_loader), len(train_loader.dataset), "\n",
         len(test_loader), len(test_loader.dataset), "\n"
         )
+    
+    labels = list()
+    for i in test_data.indices:
+        labels.append(myDataset.targets[i])
+    
+    print("Number of unique labels:", np.unique(labels, return_counts=True))
 
     # TODO: Later implement.
     #scheduler = lr_scheduler.MultiStepLR(optimizer,
@@ -107,7 +127,7 @@ if __name__ == '__main__':
                     T.Resize(256),
                     T.CenterCrop(224),
                     T.ToTensor(),
-                    T.Normalize(mean=mean_per_ch, std=std_per_ch)
+                    T.Normalize(mean=mean_per_ch[:-1], std=std_per_ch[:-1])
                 ]),
                     mf = mf, 
                     mode = 'binary'
@@ -142,13 +162,23 @@ if __name__ == '__main__':
         myDataset.targets = np.concatenate([myDataset.targets, myDataset.targets[:num_images_to_t]])
         myDataset.fnames = np.concatenate([myDataset.fnames, myDataset.fnames[:num_images_to_t]])
 
-    print(np.unique(myDataset.targets, return_counts=True))
+
+    # Assuming y contains all targets for the dataset
+    _, counts = np.unique(myDataset.targets, return_counts=True)
+
+    class_weight_0 = counts[0] / len(myDataset.targets)
+    class_weight_1 = counts[1] / len(myDataset.targets)
+    class_weights = torch.tensor([class_weight_0, class_weight_1], device=device)
+    
+    print(_, counts)
+    
     train_loader, test_loader = set_loaders(
     myDataset,
     seed=42, 
     test_split=0.3, 
-    bs=16)
-
+    bs=32,
+    test_weights = class_weights)
+    
     del myDataset
 
     # train_loader = to_device(train_loader, device)  # Move the train loader to the GPU if available
@@ -157,18 +187,37 @@ if __name__ == '__main__':
     # plot(transformed_imgs, orig_imgs[:2])
 
     # Choose from list.
-    model_name, model = list(call_builtin_models(pretrained=True).items())[-4]
+    models_ = call_builtin_models(pretrained=True)
 
     # Call spesifically.
     # model = FPCN(2, use_pretrained=True)
-    #for model in list(models.values())[:1]:
-    model = model.to(device)  # Move the model to the GPU   
+    for model_name, model in models_.items():
+        # num_features = model.classifier[6].in_features
+        # model.classifier[6] = nn.Sequential(
+        #     nn.Linear(num_features, 1024),
+        #     nn.ReLU(inplace=True),
+        #     nn.BatchNorm1d(1024),
+        #     nn.Dropout(),
+        #     nn.Linear(1024, 512),
+        #     nn.ReLU(inplace=True),
+        #     nn.BatchNorm1d(512),
+        #     nn.Dropout(),
+        #     nn.Linear(512, 2)
+        # )
 
-        # criterion = FocalLoss(2)
-    criterion = nn.CrossEntropyLoss()
+        print(model_name, "STARTS!")
+        model = model.to(device)  # Move the model to the GPU   
 
-    optimizer = optim.SGD(model.parameters(),
-                    lr=0.01,
-                    weight_decay=0.0001)
+        # Compute class weights based on the frequency of each class in y
+        # class_weights = torch.tensor([class_weight_0, class_weight_1], device=device)
+        # print(class_weight_0/class_weight_1)
+        # Define focal loss to incorporate class imbalance.
+        # criterion = FocalLoss(2, balance_param=class_weight_0/class_weight_1)
+        # Define the loss function with weights
+        criterion = nn.CrossEntropyLoss(weight=class_weights.float())
 
-    eval(model, test_loader, train_loader, optimizer, criterion, device, num_epochs=50, model_name=model_name)
+        optimizer = optim.SGD(model.parameters(),
+                        lr=0.001,
+                        weight_decay=0.01)
+
+        eval(model, test_loader, train_loader, optimizer, criterion, device, num_epochs=100, mf=mf, model_name=f"40X-nonaug-std-none-{model_name}_sgde-2_bce_32bs_100ep")

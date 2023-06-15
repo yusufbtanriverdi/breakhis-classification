@@ -134,6 +134,12 @@ def call_builtin_models(pretrained=True, num_classes=2, num_channels=3):
     # 'mnasnet' : models.mnasnet1_0(pretrained=pretrained),
     # }
 
+    # # Initialize the weights using Xavier initialization
+    # init.xavier_uniform_(self.conv1.weight)
+    # init.xavier_uniform_(self.conv2.weight)
+    # init.xavier_uniform_(self.fc1.weight)
+
+
     model_names = {
     'resnet18': 'fc',
     'alexnet': 'classifier',
@@ -154,38 +160,38 @@ def call_builtin_models(pretrained=True, num_classes=2, num_channels=3):
 
     if pretrained:
         model_dict = {
-            'resnet18': models.resnet18(weights=models.ResNet18_Weights.DEFAULT),
+            # 'resnet18': models.resnet18(weights=models.ResNet18_Weights.DEFAULT),
             'alexnet' : models.alexnet(weights=models.AlexNet_Weights.DEFAULT),
-            'vgg16_bn': models.vgg16_bn(weights=models.VGG16_BN_Weights.DEFAULT),
-            'vgg16' : models.vgg16(weights=models.VGG16_Weights.DEFAULT),
-            'vgg19_bn': models.vgg19_bn(weights=models.VGG19_BN_Weights.DEFAULT),
-            'vgg19': models.vgg19(weights=models.VGG19_Weights.DEFAULT),
-            'squeezenet' : models.squeezenet1_0(weights=models.SqueezeNet1_0_Weights.DEFAULT),
-            'densenet' : models.densenet161(weights=models.DenseNet161_Weights.DEFAULT),
-            'inception_v3' : models.inception_v3(weights=models.Inception_V3_Weights.DEFAULT),
-            'googlenet' : models.googlenet(weights=models.GoogLeNet_Weights.DEFAULT),
-            'shufflenet' : models.shufflenet_v2_x1_0(weights=models.ShuffleNet_V2_X1_0_Weights.DEFAULT),
-            'mobilenet' : models.mobilenet_v2(weights=models.MobileNet_V2_Weights.DEFAULT),
-            'resnext50_32x4d' : models.resnext50_32x4d(weights=models.ResNeXt50_32X4D_Weights.DEFAULT),
-            'wide_resnet50_2' : models.wide_resnet50_2(weights=models.Wide_ResNet50_2_Weights.DEFAULT),
-            'mnasnet' : models.mnasnet1_0(weights=models.MNASNet1_0_Weights.DEFAULT),
+            # 'vgg16_bn': models.vgg16_bn(weights=models.VGG16_BN_Weights.DEFAULT),
+            # 'vgg16' : models.vgg16(weights=models.VGG16_Weights.DEFAULT),
+            # 'vgg19_bn': models.vgg19_bn(weights=models.VGG19_BN_Weights.DEFAULT),
+            # 'vgg19': models.vgg19(weights=models.VGG19_Weights.DEFAULT),
+            # 'squeezenet' : models.squeezenet1_0(weights=models.SqueezeNet1_0_Weights.DEFAULT),
+            # 'densenet' : models.densenet161(weights=models.DenseNet161_Weights.DEFAULT),
+            # 'inception_v3' : models.inception_v3(weights=models.Inception_V3_Weights.DEFAULT),
+            # 'googlenet' : models.googlenet(weights=models.GoogLeNet_Weights.DEFAULT),
+            # 'shufflenet' : models.shufflenet_v2_x1_0(weights=models.ShuffleNet_V2_X1_0_Weights.DEFAULT),
+            # 'mobilenet' : models.mobilenet_v2(weights=models.MobileNet_V2_Weights.DEFAULT),
+            # 'resnext50_32x4d' : models.resnext50_32x4d(weights=models.ResNeXt50_32X4D_Weights.DEFAULT),
+            # 'wide_resnet50_2' : models.wide_resnet50_2(weights=models.Wide_ResNet50_2_Weights.DEFAULT), # Memory
+            # 'mnasnet' : models.mnasnet1_0(weights=models.MNASNet1_0_Weights.DEFAULT),
         }
     else:
         model_dict = {
-            'resnet18': models.resnet18(weights=None), # ++ 
-            'alexnet' : models.alexnet(weights=None), # Error
-            'vgg16_bn': models.vgg16_bn(weights=None), # Memory
-            'vgg16' : models.vgg16(weights=None), 
-            'vgg19_bn': models.vgg19_bn(weights=None), # Memory
-            'vgg19': models.vgg19(weights=None), 
-            'squeezenet' : models.squeezenet1_0(weights=None), # 
-            'densenet' : models.densenet161(weights=None), # 
-            'inception_v3' : models.inception_v3(weights=None), # 
-            'googlenet' : models.googlenet(weights=None), # 
-            'shufflenet' : models.shufflenet_v2_x1_0(weights=None), # 
-            'mobilenet' : models.mobilenet_v2(weights=None), # ++
-            'resnext50_32x4d' : models.resnext50_32x4d(weights=None), # 
-            'wide_resnet50_2' : models.wide_resnet50_2(weights=None), # ++ (32bs = memory error)
+            # 'resnet18': models.resnet18(weights=None), # ++ 
+            # 'alexnet' : models.alexnet(weights=None), # Recall either 1.0 or 0.0 - Not learning anything, due to imbalance!!
+            # 'vgg16_bn': models.vgg16_bn(weights=None), # Memory
+            # 'vgg16' : models.vgg16(weights=None), 
+            # 'vgg19_bn': models.vgg19_bn(weights=None), # Memory
+            # 'vgg19': models.vgg19(weights=None), 
+            # 'squeezenet' : models.squeezenet1_0(weights=None), # Recall either 1.0 or 0.0 - Not learning anything, due to imbalance!!
+            # 'densenet' : models.densenet161(weights=None), # Memory
+            # 'inception_v3' : models.inception_v3(weights=None), # RuntimeError: Calculated padded input size per channel: (3 x 3). Kernel size: (5 x 5). Kernel size can't be greater than actual input size
+            # 'googlenet' : models.googlenet(weights=None), # ++
+            # 'shufflenet' : models.shufflenet_v2_x1_0(weights=None), # Recall either 1.0 or 0.0 - Not learning anything, due to imbalance!!
+            # 'mobilenet' : models.mobilenet_v2(weights=None), # ++
+            # 'resnext50_32x4d' : models.resnext50_32x4d(weights=None), # Memory
+            # 'wide_resnet50_2' : models.wide_resnet50_2(weights=None), # ++ 
             'mnasnet' : models.mnasnet1_0(weights=None), # ++
         }
             
