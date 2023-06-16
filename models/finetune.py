@@ -127,7 +127,6 @@ if __name__ == '__main__':
                     T.Resize(256),
                     T.CenterCrop(224),
                     T.ToTensor(),
-                    T.Normalize(mean=mean_per_ch[:-1], std=std_per_ch[:-1])
                 ]),
                     mf = mf, 
                     mode = 'binary'
@@ -135,32 +134,6 @@ if __name__ == '__main__':
     
     print("Elapsed time in min: ", (time.time() - startTime)/60)
     print("Size of dataset", len(myDataset))
-
-
-    
-    # Augmentation 
-    elastic_transformer = T.Compose([
-    T.ToPILImage(),
-    T.ElasticTransform(alpha=100.0),
-    T.ToTensor()
-    ])
-    
-    orig_imgs = myDataset.images
-
-    num_images_to_t = 0
-    transformed_imgs = [torch.transpose(elastic_transformer(orig_img), 0, -1).numpy().astype(np.uint8) for orig_img in tqdm(orig_imgs[:num_images_to_t])]
-    # print(transformed_imgs[0].dtype, orig_imgs[0].dtype)
-
-    if num_images_to_t != 0:
-        myDataset.images = np.concatenate([np.transpose(myDataset.images, (0, 2, 1, -1)), transformed_imgs])
-    # print(myDataset.images[0].dtype)
-
-    del transformed_imgs
-    del orig_imgs
-
-    if num_images_to_t != 0:
-        myDataset.targets = np.concatenate([myDataset.targets, myDataset.targets[:num_images_to_t]])
-        myDataset.fnames = np.concatenate([myDataset.fnames, myDataset.fnames[:num_images_to_t]])
 
 
     # Assuming y contains all targets for the dataset
@@ -217,7 +190,8 @@ if __name__ == '__main__':
         criterion = nn.CrossEntropyLoss(weight=class_weights.float())
 
         optimizer = optim.SGD(model.parameters(),
-                        lr=0.001,
+                        lr=0.01,
                         weight_decay=0.01)
 
-        eval(model, test_loader, train_loader, optimizer, criterion, device, num_epochs=100, mf=mf, model_name=f"40X-nonaug-std-none-{model_name}_sgde-2_bce_32bs_100ep")
+        # Annotation follows: magnification factor; augmentation method; pretrained, model type; optimizer type, learning rate; loss, parameters; batch size, sampling strategy; # of epochs
+        eval(model, test_loader, train_loader, optimizer, criterion, device, mean_per_ch, std_per_ch, num_epochs=100, mf=mf, model_name=f"40X_on-air-sp_std_none_pre-{model_name}_sgde-2_bce_64bs-strf_100ep")

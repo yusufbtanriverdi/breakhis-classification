@@ -1,15 +1,18 @@
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-from torchmetrics import Accuracy, Recall, AveragePrecision, AUROC, MeanAbsolutePercentageError, F1Score, R2Score, CohenKappa, Specificity
+from torchmetrics import Accuracy, Recall, AveragePrecision, AUROC, F1Score, CohenKappa, Specificity
 import pandas as pd
 import datetime
 import numpy as np
 import torch.nn.functional as F
 from . import visualize
 from torchvision import transforms as T
+import cv2
+import numpy as np
+from skimage.color import rgb2hed, hed2rgb
+
 
 p = 0.8
 r = 0.3
@@ -69,9 +72,81 @@ def apply_on_air_augmentation(X, y, n, r=0.1,
 
     return selected_X_aug, selected_y
 
+import cv2
+import numpy as np
+
+def divide_images_into_patches(images, targets_y, patch_size, device, mean_per_ch, std_per_ch,
+                    method=cv2.ximgproc.SLICO):
+    
+    transform = T.Compose([
+                    T.ToPILImage(),  # Convert numpy.ndarray to PIL Image
+                    T.Resize(256),
+                    T.CenterCrop(224),
+                    T.ToTensor(),
+                    T.Normalize(mean=mean_per_ch[:-1], std=std_per_ch[:-1])
+                ])
+    # Generate patches based on superpixels
+    patches = []
+    targets = []
+
+    # fig, axs = plt.subplots(10, 5, figsize=(12, 6))
+    # axs = axs.ravel()
+    # count = 0
+
+    for ind, image in enumerate(images):
+        image = image.cpu().numpy()
+        image = np.transpose(image, axes=(1, 2, 0))
+
+        image = cv2.GaussianBlur(image, (3, 3), 0)
+        # Convert image to Lab color space for better superpixel segmentation
+        image_lab = cv2.cvtColor(image, cv2.COLOR_RGB2Lab)
+        # Separate the stains from the IHC image
+        hed = rgb2hed(image)
+        null = np.zeros_like(hed[:, :, 0])
+        ihc_h = hed2rgb(np.stack((hed[:, :, 0], null, null), axis=-1))
+        ihc_e = hed2rgb(np.stack((null, hed[:, :, 1], null), axis=-1))
+        ihc_d = hed2rgb(np.stack((null, null, hed[:, :, 2]), axis=-1))
+  
+        # instance and run SLIC
+        slic = cv2.ximgproc.createSuperpixelSLIC(image_lab, method, 100)
+        slic.iterate(50)
+
+        # replace original image pixels with superpixels means
+        labels = slic.getLabels()
+
+        unique_labels = np.unique(labels)
+        for label in unique_labels:
+            mask = labels == label
+            # Calculate the bounding box of the superpixel
+            x, y, w, h = cv2.boundingRect(mask.astype(np.uint8))
+            # Crop the corresponding region from the original image
+            patch = image[y:y+h, x:x+w, :]
+            patch = cv2.resize(patch, patch_size)
+            # if count < 50:
+            #     # print(np.nonzero(patch))
+            #     axs[count].imshow(patch)
+            #     axs[count].axis('off')
+            #     count += 1
+            # else:
+            #     plt.tight_layout()
+            #     plt.show()
+            transformed_patch = transform(torch.Tensor(np.transpose(patch, axes=(-1, 0, 1)))).to(device)
+
+            patches.append(transformed_patch)    
+            targets.append(targets_y[ind])
+
+    patches = torch.stack(patches)
+    targets = torch.Tensor(targets)
+
+
+
+    return patches, targets
+
 
 def train(model, train_loader, optimizer, criterion, eval_metrics, device, 
+          mean_per_ch, std_per_ch,
           aug=False, 
+          patch=True,
           epoch=-1):
 
     average_loss = 0
@@ -104,6 +179,15 @@ def train(model, train_loader, optimizer, criterion, eval_metrics, device,
             X = stacked_X[indices]
             y = stacked_y[indices]
 
+        if patch:
+            patch_X, patch_y = divide_images_into_patches(X, y, (226, 226), device, mean_per_ch, std_per_ch)
+            patch_X = torch.Tensor(patch_X).to(device)
+            patch_y = torch.Tensor(patch_y).to(device)
+
+            print(patch_X.size(), patch_y.size())
+
+        X = patch_X
+        y = patch_y
         # print("After", np.unique(y.cpu().detach().numpy(), return_counts=True))
         X = X.requires_grad_()
         yhat = model(X)
@@ -150,7 +234,7 @@ def train(model, train_loader, optimizer, criterion, eval_metrics, device,
     print(epoch_scores)
     return epoch_scores
 
-def test(model, test_loader, criterion, eval_metrics, device, epoch=-1, mode='binary'):
+def test(model, test_loader, criterion, eval_metrics, device, mean_per_ch, std_per_ch, epoch=-1, mode='binary', patch=True):
 
     average_loss = 0
     metric_values = {metric_name: [] for metric_name in eval_metrics.keys()}
@@ -164,7 +248,14 @@ def test(model, test_loader, criterion, eval_metrics, device, epoch=-1, mode='bi
         y = y.to(device)
 
         with torch.no_grad():
+            
+            if patch:
+                patch_X, patch_y = divide_images_into_patches(X, y, (226, 226), device, mean_per_ch, std_per_ch)
+                patch_X = torch.Tensor(patch_X).to(device)
+                patch_y = torch.Tensor(patch_y).to(device)
 
+            X = patch_X
+            y = patch_y
             X = X.requires_grad_()
             yhat = model(X)
             if not isinstance(yhat, torch.Tensor):
@@ -172,8 +263,8 @@ def test(model, test_loader, criterion, eval_metrics, device, epoch=-1, mode='bi
 
             y_vectors = F.one_hot(y, 2)
             # print(yhat.size(), y.size(), y_vectors.size())
-            print("Test", np.unique(y.cpu().detach().numpy(), return_counts=True))
-            print(y)
+            # print("Test", np.unique(y.cpu().detach().numpy(), return_counts=True))
+            # print(y)
 
             loss = criterion(yhat, y)
             average_loss += loss.item()
@@ -203,7 +294,8 @@ def test(model, test_loader, criterion, eval_metrics, device, epoch=-1, mode='bi
     print(epoch_scores)
     return epoch_scores
 
-def eval(model, test_loader, train_loader, optimizer, criterion, device, num_epochs= 1, mode='binary', model_name=None, mf='40X'):
+def eval(model, test_loader, train_loader, optimizer, criterion, device, mean_per_ch, std_per_ch,
+            num_epochs= 1, mode='binary', model_name=None, mf='40X'):
 
     eval_metrics = {
     'accuracy_score': Accuracy(task=mode).to(device),
@@ -229,8 +321,9 @@ def eval(model, test_loader, train_loader, optimizer, criterion, device, num_epo
 
     for t in tqdm(range(num_epochs), desc='Training on Breast Histopathology Dataset', unit='epoch'):
         print(f"Epoch {t+1}\n-------------------------------")
-        train_scores = train(model, train_loader, optimizer, criterion, eval_metrics, device, epoch = t,)
-        test_scores = test(model, test_loader, criterion, eval_metrics, device, epoch= t)
+        train_scores = train(model, train_loader, optimizer, criterion, eval_metrics, device, mean_per_ch, std_per_ch, 
+                             epoch = t)
+        test_scores = test(model, test_loader, criterion, eval_metrics, device, mean_per_ch, std_per_ch,  epoch= t)
         if t == 0:
             train_df = pd.DataFrame(train_scores, index=[0])
             test_df = pd.DataFrame(test_scores, index=[0])
