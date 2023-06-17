@@ -17,7 +17,6 @@ features/all/binary/200X/.DS_Store
 .DS_Store
 features/DS_Store
 
-features/all/binary/40X/imagelike/hog/
 models/results
 classifiers/results
 *.pdf
@@ -32,5 +31,4 @@ environ
 /__pycache__
 __pycache__
 __pycache__\tools.cpython-38.pyc
-features\all\binary\40X\imagelike\hog\benign\
-features\all\binary\40X\imagelike\superpixels
+features/all/binary/40X/imagelike/

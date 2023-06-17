@@ -12,7 +12,7 @@ from torchvision import transforms as T
 import cv2
 import numpy as np
 from skimage.color import rgb2hed, hed2rgb
-
+from torch.utils.data import WeightedRandomSampler
 
 p = 0.8
 r = 0.3
@@ -51,8 +51,8 @@ def apply_on_air_augmentation(X, y, n, r=0.1,
     minority_X_aug = minority_X_aug.view(-1, *minority_X_aug.shape[2:])
 
     # Get the desired number of samples from each class
-    num_samples_majority = int(n * 32 * r)  # Number of samples from majority class
-    num_samples_minority = int(n * 32 * (1 - r))  # Number of samples from minority class
+    num_samples_majority = int(n * r)  # Number of samples from majority class
+    num_samples_minority = int(n * (1 - r))  # Number of samples from minority class
 
     # Generate random indices for sampling
     majority_indices = torch.randperm(len(majority_X_aug))[:num_samples_majority]
@@ -85,6 +85,19 @@ def divide_images_into_patches(images, targets_y, patch_size, device, mean_per_c
                     T.ToTensor(),
                     T.Normalize(mean=mean_per_ch[:-1], std=std_per_ch[:-1])
                 ])
+    # Compute class weights
+    class_counts = torch.bincount(targets_y.long())
+    class_weights = 1.0 / class_counts.float()
+
+    # Create weighted sampler
+    weights = class_weights[targets_y.long()]
+    sampler = WeightedRandomSampler(weights, int(len(weights)/2), replacement=True)
+
+    # Apply sampler to indices
+    sampled_indices = list(sampler)
+    selected_images = images[sampled_indices]
+    selected_targets_y = targets_y[sampled_indices]
+
     # Generate patches based on superpixels
     patches = []
     targets = []
@@ -93,7 +106,7 @@ def divide_images_into_patches(images, targets_y, patch_size, device, mean_per_c
     # axs = axs.ravel()
     # count = 0
 
-    for ind, image in enumerate(images):
+    for ind, image in enumerate(selected_images):
         image = image.cpu().numpy()
         image = np.transpose(image, axes=(1, 2, 0))
 
@@ -101,11 +114,11 @@ def divide_images_into_patches(images, targets_y, patch_size, device, mean_per_c
         # Convert image to Lab color space for better superpixel segmentation
         image_lab = cv2.cvtColor(image, cv2.COLOR_RGB2Lab)
         # Separate the stains from the IHC image
-        hed = rgb2hed(image)
-        null = np.zeros_like(hed[:, :, 0])
-        ihc_h = hed2rgb(np.stack((hed[:, :, 0], null, null), axis=-1))
-        ihc_e = hed2rgb(np.stack((null, hed[:, :, 1], null), axis=-1))
-        ihc_d = hed2rgb(np.stack((null, null, hed[:, :, 2]), axis=-1))
+        # hed = rgb2hed(image)
+        # null = np.zeros_like(hed[:, :, 0])
+        # ihc_h = hed2rgb(np.stack((hed[:, :, 0], null, null), axis=-1))
+        # ihc_e = hed2rgb(np.stack((null, hed[:, :, 1], null), axis=-1))
+        # ihc_d = hed2rgb(np.stack((null, null, hed[:, :, 2]), axis=-1))
   
         # instance and run SLIC
         slic = cv2.ximgproc.createSuperpixelSLIC(image_lab, method, 100)
@@ -133,12 +146,10 @@ def divide_images_into_patches(images, targets_y, patch_size, device, mean_per_c
             transformed_patch = transform(torch.Tensor(np.transpose(patch, axes=(-1, 0, 1)))).to(device)
 
             patches.append(transformed_patch)    
-            targets.append(targets_y[ind])
+            targets.append(selected_targets_y[ind])
 
     patches = torch.stack(patches)
     targets = torch.Tensor(targets)
-
-
 
     return patches, targets
 
@@ -162,11 +173,25 @@ def train(model, train_loader, optimizer, criterion, eval_metrics, device,
 
         X = X.to(device)
         y = y.to(device)
-        # print("Before", np.unique(y.cpu().detach().numpy(), return_counts=True))
+        print("Before", np.unique(y.cpu().detach().numpy(), return_counts=True))
+
+        if patch:
+            patch_X, patch_y = divide_images_into_patches(X, y, (226, 226), device, mean_per_ch, std_per_ch)
+            patch_X = torch.Tensor(patch_X).to(device)
+            patch_y = torch.Tensor(patch_y).to(device)
+
+            # Shuffle the stacked data and labels
+            indices = torch.randperm(patch_X.size(0))
+            X = patch_X[indices]
+            y = patch_y[indices]
+            
+            del patch_X, patch_y
+
+        print("Middle", np.unique(y.cpu().detach().numpy(), return_counts=True))
 
         # Apply on-the-fly augmentation to obtain augmented data and labels
         if aug:
-            X_aug, y_aug = apply_on_air_augmentation(X, y, n=1)
+            X_aug, y_aug = apply_on_air_augmentation(X, y, n=int(len(y)))
 
             X_aug = X_aug.to(device)
             y_aug = y_aug.to(device)
@@ -179,16 +204,10 @@ def train(model, train_loader, optimizer, criterion, eval_metrics, device,
             X = stacked_X[indices]
             y = stacked_y[indices]
 
-        if patch:
-            patch_X, patch_y = divide_images_into_patches(X, y, (226, 226), device, mean_per_ch, std_per_ch)
-            patch_X = torch.Tensor(patch_X).to(device)
-            patch_y = torch.Tensor(patch_y).to(device)
+            del stacked_X, stacked_y, X_aug, y_aug
 
-            print(patch_X.size(), patch_y.size())
-
-        X = patch_X
-        y = patch_y
-        # print("After", np.unique(y.cpu().detach().numpy(), return_counts=True))
+        
+        print("After", np.unique(y.cpu().detach().numpy(), return_counts=True))
         X = X.requires_grad_()
         yhat = model(X)
         if not isinstance(yhat, torch.Tensor):
@@ -234,7 +253,10 @@ def train(model, train_loader, optimizer, criterion, eval_metrics, device,
     print(epoch_scores)
     return epoch_scores
 
-def test(model, test_loader, criterion, eval_metrics, device, mean_per_ch, std_per_ch, epoch=-1, mode='binary', patch=True):
+def test(model, test_loader, criterion, eval_metrics, device, mean_per_ch, std_per_ch, 
+         epoch=-1, 
+         mode='binary', 
+         patch=True):
 
     average_loss = 0
     metric_values = {metric_name: [] for metric_name in eval_metrics.keys()}
@@ -246,24 +268,29 @@ def test(model, test_loader, criterion, eval_metrics, device, mean_per_ch, std_p
     for X, y in test_loader:
         X = X.to(device)
         y = y.to(device)
+        if patch:
+            print("??????")
+            patch_X, patch_y = divide_images_into_patches(X, y, (226, 226), device, mean_per_ch, std_per_ch)
+            patch_X = torch.Tensor(patch_X).to(device)
+            patch_y = torch.Tensor(patch_y).to(device)
+            
+            # Shuffle the stacked data and labels
+            indices = torch.randperm(patch_X.size(0))
+            X = patch_X[indices]
+            y = patch_y[indices]
+
+            del patch_X, patch_y
 
         with torch.no_grad():
-            
-            if patch:
-                patch_X, patch_y = divide_images_into_patches(X, y, (226, 226), device, mean_per_ch, std_per_ch)
-                patch_X = torch.Tensor(patch_X).to(device)
-                patch_y = torch.Tensor(patch_y).to(device)
-
-            X = patch_X
-            y = patch_y
             X = X.requires_grad_()
             yhat = model(X)
             if not isinstance(yhat, torch.Tensor):
                 yhat = yhat[0]
 
+            y = y.long()
             y_vectors = F.one_hot(y, 2)
             # print(yhat.size(), y.size(), y_vectors.size())
-            # print("Test", np.unique(y.cpu().detach().numpy(), return_counts=True))
+            print("Test", np.unique(y.cpu().detach().numpy(), return_counts=True))
             # print(y)
 
             loss = criterion(yhat, y)

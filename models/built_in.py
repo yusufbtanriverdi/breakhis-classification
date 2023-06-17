@@ -160,8 +160,8 @@ def call_builtin_models(pretrained=True, num_classes=2, num_channels=3):
 
     if pretrained:
         model_dict = {
-            'resnet18': models.resnet18(weights=models.ResNet18_Weights.DEFAULT),
-            # 'alexnet' : models.alexnet(weights=models.AlexNet_Weights.DEFAULT),
+            # 'resnet18': models.resnet18(weights=models.ResNet18_Weights.DEFAULT),
+            'alexnet' : models.alexnet(weights=models.AlexNet_Weights.DEFAULT),
             # 'vgg16_bn': models.vgg16_bn(weights=models.VGG16_BN_Weights.DEFAULT),
             # 'vgg16' : models.vgg16(weights=models.VGG16_Weights.DEFAULT),
             # 'vgg19_bn': models.vgg19_bn(weights=models.VGG19_BN_Weights.DEFAULT),

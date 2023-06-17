@@ -10,6 +10,13 @@ import os
 from PIL import Image
 import matplotlib.pyplot as plt
 
+
+def read_means_and_stds(mf):
+    info_means = pd.read_csv('features\mean.csv', index_col='mf')    
+    info_stdes = pd.read_csv('features\std.csv', index_col='mf')
+
+    return np.array(info_means.loc[mf, :]), np.array(info_stdes.loc[mf, :])
+
 def plot(imgs, orig_imgs, row_title='Transformed Image', **imshow_kwargs):
     num_rows = len(imgs)
     num_cols = 2

@@ -20,7 +20,7 @@ parent_dir = os.path.abspath(os.path.join(os.getcwd(), "."))
 # Add the parent directory to the Python path
 sys.path.append(parent_dir)
 
-from tools import BreaKHis, plot
+from tools import BreaKHis, plot, read_means_and_stds
 
 
 def set_loaders(myDataset, seed=42, test_split=0.3, bs=16, test_weights=None):
@@ -89,12 +89,6 @@ def set_loaders(myDataset, seed=42, test_split=0.3, bs=16, test_weights=None):
     #                                     milestones=[3750, 5000],
     #                                     gamma=0.1))
     return train_loader, test_loader
-
-def read_means_and_stds(mf):
-    info_means = pd.read_csv('features\mean.csv', index_col='mf')    
-    info_stdes = pd.read_csv('features\std.csv', index_col='mf')
-
-    return np.array(info_means.loc[mf, :]), np.array(info_stdes.loc[mf, :])
 
 def to_device(data_loader, device):
     for batch in data_loader:
@@ -190,8 +184,8 @@ if __name__ == '__main__':
         criterion = nn.CrossEntropyLoss(weight=class_weights.float())
 
         optimizer = optim.SGD(model.parameters(),
-                        lr=0.01,
+                        lr=0.001,
                         weight_decay=0.01)
 
         # Annotation follows: magnification factor; augmentation method; pretrained, model type; optimizer type, learning rate; loss, parameters; batch size, sampling strategy; # of epochs
-        eval(model, test_loader, train_loader, optimizer, criterion, device, mean_per_ch, std_per_ch, num_epochs=100, mf=mf, model_name=f"40X_on-air-sp_std_none_pre-{model_name}_sgde-2_bce_64bs-strf_100ep")
+        eval(model, test_loader, train_loader, optimizer, criterion, device, mean_per_ch, std_per_ch, num_epochs=100, mf=mf, model_name=f"40X_on-air-sp_std_none_pre-{model_name}_sgde-3_bce_32bs-strf_100ep")
