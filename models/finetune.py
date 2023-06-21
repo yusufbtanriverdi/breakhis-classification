@@ -157,35 +157,37 @@ if __name__ == '__main__':
     models_ = call_builtin_models(pretrained=True)
 
     # Call spesifically.
-    # model = FPCN(2, use_pretrained=True)
-    for model_name, model in models_.items():
-        # num_features = model.classifier[6].in_features
-        # model.classifier[6] = nn.Sequential(
-        #     nn.Linear(num_features, 1024),
-        #     nn.ReLU(inplace=True),
-        #     nn.BatchNorm1d(1024),
-        #     nn.Dropout(),
-        #     nn.Linear(1024, 512),
-        #     nn.ReLU(inplace=True),
-        #     nn.BatchNorm1d(512),
-        #     nn.Dropout(),
-        #     nn.Linear(512, 2)
-        # )
+    model = FPCN(2, use_pretrained=True)
+    model_name = 'fpcn_init'
 
-        print(model_name, "STARTS!")
-        model = model.to(device)  # Move the model to the GPU   
+    #for model_name, model in models_.items():
+    # num_features = model.classifier[6].in_features
+    # model.classifier[6] = nn.Sequential(
+    #     nn.Linear(num_features, 1024),
+    #     nn.ReLU(inplace=True),
+    #     nn.BatchNorm1d(1024),
+    #     nn.Dropout(),
+    #     nn.Linear(1024, 512),
+    #     nn.ReLU(inplace=True),
+    #     nn.BatchNorm1d(512),
+    #     nn.Dropout(),
+    #     nn.Linear(512, 2)
+    # )
 
-        # Compute class weights based on the frequency of each class in y
-        # class_weights = torch.tensor([class_weight_0, class_weight_1], device=device)
-        # print(class_weight_0/class_weight_1)
-        # Define focal loss to incorporate class imbalance.
-        # criterion = FocalLoss(2, balance_param=class_weight_0/class_weight_1)
-        # Define the loss function with weights
-        criterion = nn.CrossEntropyLoss(weight=class_weights.float())
+    print(model_name, "STARTS!")
+    model = model.to(device)  # Move the model to the GPU   
 
-        optimizer = optim.SGD(model.parameters(),
-                        lr=0.001,
-                        weight_decay=0.01)
+    # Compute class weights based on the frequency of each class in y
+    # class_weights = torch.tensor([class_weight_0, class_weight_1], device=device)
+    # print(class_weight_0/class_weight_1)
+    # Define focal loss to incorporate class imbalance.
+    criterion = FocalLoss(alpha=0.3, gamma=1)
+    # Define the loss function with weights
+    # criterion = nn.CrossEntropyLoss(weight=class_weights.float())
 
-        # Annotation follows: magnification factor; augmentation method; pretrained, model type; optimizer type, learning rate; loss, parameters; batch size, sampling strategy; # of epochs
-        eval(model, test_loader, train_loader, optimizer, criterion, device, mean_per_ch, std_per_ch, num_epochs=100, mf=mf, model_name=f"40X_on-air-sp_std_none_pre-{model_name}_sgde-3_bce_32bs-strf_100ep")
+    optimizer = optim.SGD(model.parameters(),
+                    lr=0.01,
+                    weight_decay=0.001)
+
+    # Annotation follows: magnification factor; augmentation method; pretrained, model type; optimizer type, learning rate; loss, parameters; batch size, sampling strategy; # of epochs
+    eval(model, test_loader, train_loader, optimizer, criterion, device, mean_per_ch, std_per_ch, patch=True ,num_epochs=100, mf=mf, model_name=f"40X_on-air-sp_std_none_prebackbone-{model_name}_sgde-2e-4_focal0.3-1_32bs-strf_100ep")

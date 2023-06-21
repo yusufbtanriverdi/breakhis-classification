@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 
 from .resnet import resnet50_features, resnet18_features
-from .utilities.layers import conv1x1, conv3x3
+from .utilities.layers import conv1x1_bn, conv3x3_bn
 import numpy as  np
 
 # Source: https://github.com/c0nn3r/RetinaNet/blob/master/resnet_features.py 
@@ -20,22 +20,22 @@ class FeaturePyramid(nn.Module):
         self.resnet = resnet
 
         # applied in a pyramid
-        self.pyramid_transformation_3 = conv1x1(128, 256)
-        self.pyramid_transformation_4 = conv1x1(256, 256)
-        self.pyramid_transformation_5 = conv1x1(512, 256)
+        self.pyramid_transformation_3 = conv1x1_bn(128, 256)
+        self.pyramid_transformation_4 = conv1x1_bn(256, 256)
+        self.pyramid_transformation_5 = conv1x1_bn(512, 256)
 
         # both based around resnet_feature_5
-        self.pyramid_transformation_6 = conv3x3(512, 256, padding=1, stride=2)
-        self.pyramid_transformation_7 = conv3x3(256, 256, padding=1, stride=2)
+        self.pyramid_transformation_6 = conv3x3_bn(512, 256, padding=1, stride=2)
+        self.pyramid_transformation_7 = conv3x3_bn(256, 256, padding=1, stride=2)
 
         # applied after upsampling
-        self.upsample_transform_1 = conv3x3(256, 256, padding=1)
-        self.upsample_transform_2 = conv3x3(256, 256, padding=1)
+        self.upsample_transform_1 = conv3x3_bn(256, 256, padding=1)
+        self.upsample_transform_2 = conv3x3_bn(256, 256, padding=1)
 
     def _upsample(self, original_feature, scaled_feature, scale_factor=2):
         # is this correct? You do lose information on the upscale...
         height, width = scaled_feature.size()[2:]
-        return F.interpolate(original_feature, scale_factor=scale_factor)[:, :, :height, :width]
+        return F.interpolate(original_feature, scale_factor=scale_factor, mode='bilinear')[:, :, :height, :width]
 
     def forward(self, x):
 
@@ -78,15 +78,18 @@ class SubNet(nn.Module):
         self.base_activation = base_activation
         self.output_activation = output_activation
         self.sum_ = 0
-        self.subnet_base = nn.ModuleList([conv3x3(1280, 1280, padding=1)
+        self.subnet_base = nn.ModuleList([conv3x3_bn(1280, 1280, padding=1)
                                           for _ in range(depth)])
 
 
         if mode == 'classes':
-            self.subnet_output = nn.Sequential( conv3x3(1280, 256, padding=1),
+            self.subnet_output = nn.Sequential( conv3x3_bn(1280, 256, padding=1),
                                                 nn.AdaptiveAvgPool2d(2),
-                                                nn.Flatten(),  # Add a flatten layer to convert the tensor to 1D
-                                                nn.Linear(256*4, self.num_classes),  
+                                                # Add a flatten layer to convert the tensor to 1D.
+                                                nn.Flatten(),  
+                                                nn.Linear(256*4, 256*2),  
+                                                nn.ReLU(),
+                                                nn.Linear(256*2, self.num_classes),  
                                             )
                                                         
 

@@ -20,10 +20,10 @@ r = 0.3
 majority_transforms = T.RandomApply(transforms=[
     T.RandomVerticalFlip(p=0.5), 
     T.RandomHorizontalFlip(p=0.5), 
-    T.ElasticTransform(alpha=50.0, sigma=2.0), 
+    # T.ElasticTransform(alpha=50.0, sigma=2.0), 
     T.RandomPerspective(p=0.5, distortion_scale=0.2),
-    T.ColorJitter(brightness=.5, hue=.3),
-    T.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5))
+    # T.ColorJitter(brightness=.5, hue=.3),
+    # T.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5))
     # Add other transformations for the minority class as desired
 ], p= p*r)
 
@@ -31,18 +31,17 @@ majority_transforms = T.RandomApply(transforms=[
 minority_transforms = T.RandomApply(transforms=[
     T.RandomVerticalFlip(p=0.5), 
     T.RandomHorizontalFlip(p=0.5), 
-    T.ElasticTransform(alpha=50.0, sigma=2.0), 
+    # T.ElasticTransform(alpha=50.0, sigma=2.0), 
     T.RandomPerspective(p=0.5, distortion_scale=0.2),
-    T.ColorJitter(brightness=.5, hue=.3),
-    T.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5))
+    # T.ColorJitter(brightness=.5, hue=.3),
+    # T.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5))
     # Add other transformations for the minority class as desired
 ], p= p*(1-r))
 
 # Define the elastic transform function with adjustable probability
-def apply_on_air_augmentation(X, y, n, r=0.1,
+def apply_on_air_augmentation(X, y, n, r=0.5,
                               majority_transforms=majority_transforms,
-                              minority_transforms=majority_transforms,
-                              device='cpu'):
+                              minority_transforms=majority_transforms):
     # Assuming you have the augmented majority and minority samples
     majority_X_aug = torch.stack([majority_transforms(X[y == 1]) for _ in range(n)], dim=1)
     minority_X_aug = torch.stack([minority_transforms(X[y == 0]) for _ in range(n)], dim=1)
@@ -157,7 +156,7 @@ def divide_images_into_patches(images, targets_y, patch_size, device, mean_per_c
 def train(model, train_loader, optimizer, criterion, eval_metrics, device, 
           mean_per_ch, std_per_ch,
           aug=False, 
-          patch=True,
+          patch=False,
           epoch=-1):
 
     average_loss = 0
@@ -173,7 +172,7 @@ def train(model, train_loader, optimizer, criterion, eval_metrics, device,
 
         X = X.to(device)
         y = y.to(device)
-        print("Before", np.unique(y.cpu().detach().numpy(), return_counts=True))
+        # print("Before", np.unique(y.cpu().detach().numpy(), return_counts=True))
 
         if patch:
             patch_X, patch_y = divide_images_into_patches(X, y, (226, 226), device, mean_per_ch, std_per_ch)
@@ -187,11 +186,11 @@ def train(model, train_loader, optimizer, criterion, eval_metrics, device,
             
             del patch_X, patch_y
 
-        print("Middle", np.unique(y.cpu().detach().numpy(), return_counts=True))
+        # print("Middle", np.unique(y.cpu().detach().numpy(), return_counts=True))
 
         # Apply on-the-fly augmentation to obtain augmented data and labels
         if aug:
-            X_aug, y_aug = apply_on_air_augmentation(X, y, n=int(len(y)))
+            X_aug, y_aug = apply_on_air_augmentation(X, y, n=int(len(y)/3))
 
             X_aug = X_aug.to(device)
             y_aug = y_aug.to(device)
@@ -255,8 +254,7 @@ def train(model, train_loader, optimizer, criterion, eval_metrics, device,
 
 def test(model, test_loader, criterion, eval_metrics, device, mean_per_ch, std_per_ch, 
          epoch=-1, 
-         mode='binary', 
-         patch=True):
+         patch=False):
 
     average_loss = 0
     metric_values = {metric_name: [] for metric_name in eval_metrics.keys()}
@@ -269,7 +267,7 @@ def test(model, test_loader, criterion, eval_metrics, device, mean_per_ch, std_p
         X = X.to(device)
         y = y.to(device)
         if patch:
-            print("??????")
+            # print("??????")
             patch_X, patch_y = divide_images_into_patches(X, y, (226, 226), device, mean_per_ch, std_per_ch)
             patch_X = torch.Tensor(patch_X).to(device)
             patch_y = torch.Tensor(patch_y).to(device)
@@ -322,7 +320,7 @@ def test(model, test_loader, criterion, eval_metrics, device, mean_per_ch, std_p
     return epoch_scores
 
 def eval(model, test_loader, train_loader, optimizer, criterion, device, mean_per_ch, std_per_ch,
-            num_epochs= 1, mode='binary', model_name=None, mf='40X'):
+            num_epochs= 1, mode='binary', model_name=None, mf='40X', patch=True):
 
     eval_metrics = {
     'accuracy_score': Accuracy(task=mode).to(device),
@@ -335,6 +333,7 @@ def eval(model, test_loader, train_loader, optimizer, criterion, device, mean_pe
     }
 
     m_titles = {
+    'Average Loss': 'Average Loss',
     'accuracy_score': 'Accuracy',
     'roc_auc_score': 'ROC AUC',
     'average_precision_score' : 'Average Precision',
@@ -349,8 +348,11 @@ def eval(model, test_loader, train_loader, optimizer, criterion, device, mean_pe
     for t in tqdm(range(num_epochs), desc='Training on Breast Histopathology Dataset', unit='epoch'):
         print(f"Epoch {t+1}\n-------------------------------")
         train_scores = train(model, train_loader, optimizer, criterion, eval_metrics, device, mean_per_ch, std_per_ch, 
+                             patch= patch,
                              epoch = t)
-        test_scores = test(model, test_loader, criterion, eval_metrics, device, mean_per_ch, std_per_ch,  epoch= t)
+        test_scores = test(model, test_loader, criterion, eval_metrics, device, mean_per_ch, std_per_ch,  
+                           patch= patch,
+                           epoch= t)
         if t == 0:
             train_df = pd.DataFrame(train_scores, index=[0])
             test_df = pd.DataFrame(test_scores, index=[0])
