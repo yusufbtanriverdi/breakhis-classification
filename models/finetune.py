@@ -158,7 +158,7 @@ if __name__ == '__main__':
 
     # Call spesifically.
     model = FPCN(2, use_pretrained=True)
-    model_name = 'fpcn_init'
+    model_name = 'fpcn'
 
     #for model_name, model in models_.items():
     # num_features = model.classifier[6].in_features
