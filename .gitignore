@@ -12,6 +12,7 @@ environ
 __pycache__
 __pycache__\tools.cpython-38.pyc
 features/all/binary/*/*.csv
+features/all/binary/*/*/*.csv
 features/all/binary/*.DS_Store
 features/all/binary/200X/.DS_Store
 .DS_Store
