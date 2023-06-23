@@ -4,11 +4,9 @@ from extractors.glcm import GLCM
 from extractors.orb import ORB
 from extractors.pftas import PFTAS
 from extractors.clbp import CLBP
-
 from extractors.fos import FOS
 from extractors.hog import HOG
 from extractors.hos import HOS
-from extractors.fft import FFT
 from extractors.hog import HOG
 from extractors.superpixels import SuperpixelsEx
 from extractors.wpd import WPD
@@ -54,7 +52,7 @@ def extract_features(stacks, extractors=None, save=True, feature_dir="features/a
     # df = pd.DataFrame.from_dict(dict_)
 
     for extractor in extractors:
-        filename = feature_dir + "" + str(extractor) + "/"
+        filename = feature_dir + str(extractor) + "/"
 
         for j in tqdm(range(len(imgs))):
             feature_values = list(extractor.describe(imgs[j]))
@@ -106,18 +104,17 @@ if __name__ == "__main__":
                   # PFTAS()
                   # HOS(),
                   # FOS(),
-                  # FFT(),
                   # SuperpixelsEx(),
                   # HOG(),
-                  WPD(),
+                  # WPD(),
                   ]
 
     mf = '400X'
-    stack  = read_data(root="C:/Users/hadil/Documents/projects/Machine Learning/project/breast/", mf=mf, mode='binary',shuffle=False)
+    stack  = read_data(root='../BreaKHis_v1/', mf=mf, mode='binary',shuffle=False)
     if len(stack) == 0:
         print("Please change data dir!!")
         raise NotADirectoryError
     
-    fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/wpd/')
+    fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/')
 
     # fnames, fs = extract_imageLike(stack, extractor=extractors[0], save=True, feature_dir=f'D:/imageLike_features/{mf}/')

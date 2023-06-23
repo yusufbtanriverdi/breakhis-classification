@@ -44,6 +44,10 @@ def read_data(root, mf, mode = 'binary', shuffle= True, imsize=None):
         stack_0 = read_images(paths[0], 0, imsize)
         stack_1 = read_images(paths[1], 1, imsize)
     
+    elif mode == 'multiclass':
+        print( "TO BE IMPLEMENTED!")
+        pass
+
     stack = np.concatenate([stack_0, stack_1])
     if shuffle:
         np.random.shuffle(stack)

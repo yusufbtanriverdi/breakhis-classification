@@ -47,16 +47,7 @@ class SuperpixelsEx():
 
 
     def extract_features(self, img):
-        # Extract color features (mean values for each channel)
-        color_features = np.mean(img, axis=(0, 1))
-
-        # Extract shape features (using Hu Moments)
-        gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-        moments = cv.moments(gray_img)
-        hu_moments = cv.HuMoments(moments)
-        shape_features = hu_moments.reshape(-1)
-
-        return np.concatenate((color_features, shape_features))
+        pass
 
 if __name__ == '__main__':
     image = cv.imread('.\examples\SOB_B_A-14-22549AB-40-019.png', cv.IMREAD_COLOR)

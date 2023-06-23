@@ -1,8 +1,7 @@
 import cv2 as cv
 import numpy as np
 
-# Hugely collinear!!
-class ShapeEx():
+class HuMoments():
 
     def __init__(self):
         pass
@@ -17,7 +16,6 @@ class ShapeEx():
         hu_moments = cv.HuMoments(moments)
         shape_features = -np.sign((hu_moments) * np.log10(np.abs(hu_moments)))
         shape_features = shape_features.reshape(-1)
-
         return shape_features
 
 if __name__ == '__main__':
