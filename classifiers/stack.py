@@ -12,7 +12,7 @@ parent_dir = os.path.abspath(os.path.join(os.getcwd(), "."))
 sys.path.append(parent_dir)
 # print(sys.path)
 # Now we can import the tools module
-from tools import read_images, binary_paths
+from tools import read_images, binary_paths, multiclass_paths
 
 def np_one_hot_encoder(y):
     """Convert labels to one hot vectors."""
@@ -43,39 +43,50 @@ def read_data(root, mf, mode = 'binary', shuffle= True, imsize=None):
 
         stack_0 = read_images(paths[0], 0, imsize)
         stack_1 = read_images(paths[1], 1, imsize)
-    
-    elif mode == 'multiclass':
-        print( "TO BE IMPLEMENTED!")
-        pass
 
-    stack = np.concatenate([stack_0, stack_1])
-    if shuffle:
-        np.random.shuffle(stack)
-    return stack
+        stack = np.concatenate([stack_0, stack_1])
+        if shuffle:
+            np.random.shuffle(stack)
+        return stack
+
+    elif mode == 'multiclass':
+        paths_dict = multiclass_paths(root, mf)
+
+        stack = []
+        for key, (binary_label, multiclass_label, paths) in paths_dict.items():
+            current = read_images(paths, binary_label, imsize=imsize, multiclass_label=multiclass_label)
+            stack = np.append(stack, current)
+
+        if shuffle:
+            np.random.shuffle(stack)
+        return stack
+    
+    pass
+
 
 # def stack_data(stacks, transforms=None, features=None, mode='extract'):
-    """Stack different classes, apply transforms and features. """
+#     """Stack different classes, apply transforms and features. """
 
-    if mode not in ['extract', 'get']:
-        raise ValueError
+#     if mode not in ['extract', 'get']:
+#         raise ValueError
     
-    # TODO: Concat stacks first
-    num_samples = len(stacks)
-    num_features = len(features)
+#     # TODO: Concat stacks first
+#     num_samples = len(stacks)
+#     num_features = len(features)
 
-    # Initialize target matrix.
-    y = stacks[:, 1]
-    # Get images.
-    imgs = stacks[:, 0]
-    # Initialize feature matrix.
-    X = np.empty(shape=(num_samples, num_features), dtype=np.float128)
+#     # Initialize target matrix.
+#     y = stacks[:, 1]
+#     # Get images.
+#     imgs = stacks[:, 0]
+#     # Initialize feature matrix.
+#     X = np.empty(shape=(num_samples, num_features), dtype=np.float128)
     
-    for i, feature_extractor in enumerate(features):
-        if mode == 'extract':
-            X[:, i] = feature_extractor(imgs)
-        else:
-            X[:, i] = read_features(feature_extractor, imgs)
-    return X, y
+#     for i, feature_extractor in enumerate(features):
+#         if mode == 'extract':
+#             X[:, i] = feature_extractor(imgs)
+#         else:
+#             X[:, i] = read_features(feature_extractor, imgs)
+#     return X, y
 
 def split_data(X, y, one_hot_vector=False, test_size=0.3):
     """Return X_train, X_test, y_train, y_test for classifiers with given split rate."""

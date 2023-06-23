@@ -110,11 +110,11 @@ if __name__ == "__main__":
                   ]
 
     mf = '400X'
-    stack  = read_data(root='../BreaKHis_v1/', mf=mf, mode='binary',shuffle=False)
+    stack  = read_data(root='../BreaKHis_v1/', mf=mf, mode='multiclass', shuffle=False)
     if len(stack) == 0:
         print("Please change data dir!!")
         raise NotADirectoryError
-    
-    fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/')
+    print(stack)
+    # fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/')
 
     # fnames, fs = extract_imageLike(stack, extractor=extractors[0], save=True, feature_dir=f'D:/imageLike_features/{mf}/')
