@@ -84,12 +84,13 @@ class SubNet(nn.Module):
 
         if mode == 'classes':
             self.subnet_output = nn.Sequential( conv3x3_bn(1280, 256, padding=1),
-                                                nn.AdaptiveAvgPool2d(2),
+                                                # nn.AdaptiveAvgPool2d(4),
                                                 # Add a flatten layer to convert the tensor to 1D.
                                                 nn.Flatten(),  
-                                                nn.Linear(256*4, 256*2),  
+                                                nn.Linear(12544, 2048),  
+                                                # nn.BatchNorm2d(2048),
                                                 nn.ReLU(),
-                                                nn.Linear(256*2, self.num_classes),  
+                                                nn.Linear(2048, self.num_classes)
                                             )
                                                         
 

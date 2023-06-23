@@ -160,7 +160,7 @@ def call_builtin_models(pretrained=True, num_classes=2, num_channels=3):
 
     if pretrained:
         model_dict = {
-            'resnet18': models.resnet18(weights=models.ResNet18_Weights.DEFAULT),
+            # 'resnet18': models.resnet18(weights=models.ResNet18_Weights.DEFAULT),
             # 'alexnet' : models.alexnet(weights=models.AlexNet_Weights.DEFAULT),
             # 'vgg16_bn': models.vgg16_bn(weights=models.VGG16_BN_Weights.DEFAULT),
             # 'vgg16' : models.vgg16(weights=models.VGG16_Weights.DEFAULT),
@@ -174,7 +174,7 @@ def call_builtin_models(pretrained=True, num_classes=2, num_channels=3):
             # 'mobilenet' : models.mobilenet_v2(weights=models.MobileNet_V2_Weights.DEFAULT),
             # 'resnext50_32x4d' : models.resnext50_32x4d(weights=models.ResNeXt50_32X4D_Weights.DEFAULT),
             # 'wide_resnet50_2' : models.wide_resnet50_2(weights=models.Wide_ResNet50_2_Weights.DEFAULT), # Memory
-            # 'mnasnet' : models.mnasnet1_0(weights=models.MNASNet1_0_Weights.DEFAULT),
+            'mnasnet' : models.mnasnet1_0(weights=models.MNASNet1_0_Weights.DEFAULT),
         }
     else:
         model_dict = {
@@ -192,7 +192,7 @@ def call_builtin_models(pretrained=True, num_classes=2, num_channels=3):
             # 'mobilenet' : models.mobilenet_v2(weights=None), # ++
             # 'resnext50_32x4d' : models.resnext50_32x4d(weights=None), # Memory
             # 'wide_resnet50_2' : models.wide_resnet50_2(weights=None), # ++ 
-            'mnasnet' : models.mnasnet1_0(weights=None), # ++
+            # 'mnasnet' : models.mnasnet1_0(weights=None), # ++
         }
             
 

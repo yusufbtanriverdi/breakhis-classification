@@ -20,10 +20,10 @@ r = 0.3
 majority_transforms = T.RandomApply(transforms=[
     T.RandomVerticalFlip(p=0.5), 
     T.RandomHorizontalFlip(p=0.5), 
-    # T.ElasticTransform(alpha=50.0, sigma=2.0), 
+    T.ElasticTransform(alpha=50.0, sigma=2.0), 
     T.RandomPerspective(p=0.5, distortion_scale=0.2),
-    # T.ColorJitter(brightness=.5, hue=.3),
-    # T.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5))
+    T.ColorJitter(brightness=.5, hue=.3),
+    T.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5))
     # Add other transformations for the minority class as desired
 ], p= p*r)
 
@@ -31,10 +31,10 @@ majority_transforms = T.RandomApply(transforms=[
 minority_transforms = T.RandomApply(transforms=[
     T.RandomVerticalFlip(p=0.5), 
     T.RandomHorizontalFlip(p=0.5), 
-    # T.ElasticTransform(alpha=50.0, sigma=2.0), 
+    T.ElasticTransform(alpha=50.0, sigma=2.0), 
     T.RandomPerspective(p=0.5, distortion_scale=0.2),
-    # T.ColorJitter(brightness=.5, hue=.3),
-    # T.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5))
+    T.ColorJitter(brightness=.5, hue=.3),
+    T.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5))
     # Add other transformations for the minority class as desired
 ], p= p*(1-r))
 
@@ -74,8 +74,11 @@ def apply_on_air_augmentation(X, y, n, r=0.5,
 import cv2
 import numpy as np
 
+ # cv::ximgproc::SLIC = 100,
+ # cv::ximgproc::SLICO = 101,
+ # cv::ximgproc::MSLIC = 102 
 def divide_images_into_patches(images, targets_y, patch_size, device, mean_per_ch, std_per_ch,
-                    method=cv2.ximgproc.SLICO):
+                    method=cv2.ximgproc.SLIC, s=50):
     
     transform = T.Compose([
                     T.ToPILImage(),  # Convert numpy.ndarray to PIL Image
@@ -101,10 +104,6 @@ def divide_images_into_patches(images, targets_y, patch_size, device, mean_per_c
     patches = []
     targets = []
 
-    # fig, axs = plt.subplots(10, 5, figsize=(12, 6))
-    # axs = axs.ravel()
-    # count = 0
-
     for ind, image in enumerate(selected_images):
         image = image.cpu().numpy()
         image = np.transpose(image, axes=(1, 2, 0))
@@ -120,28 +119,38 @@ def divide_images_into_patches(images, targets_y, patch_size, device, mean_per_c
         # ihc_d = hed2rgb(np.stack((null, null, hed[:, :, 2]), axis=-1))
   
         # instance and run SLIC
-        slic = cv2.ximgproc.createSuperpixelSLIC(image_lab, method, 100)
-        slic.iterate(50)
+        slic = cv2.ximgproc.createSuperpixelSLIC(image_lab, algorithm = method, region_size = s, ruler=20.0)
+        slic.iterate(100)
 
-        # replace original image pixels with superpixels means
+
+        # Get the contour mask
+        # contour_mask = slic.getLabelContourMask()
+
+        # # Create a copy of the image to overlay the contour
+        # output = image.copy()
+
+        # # Apply the contour mask as an overlay on the image
+        # output[contour_mask > 0] = [0, 0, 255]  # Red color for the contour pixels
+        
+        # plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
+        # plt.axis('off')
+        # plt.tight_layout()
+        # plt.show()
+
+        # Get the labels and number of superpixels
         labels = slic.getLabels()
-
         unique_labels = np.unique(labels)
-        for label in unique_labels:
+        # Randomly select half of the labels
+        np.random.shuffle(unique_labels)
+        selected_labels = unique_labels[:len(unique_labels) // 6]
+
+        for label in selected_labels:
             mask = labels == label
             # Calculate the bounding box of the superpixel
             x, y, w, h = cv2.boundingRect(mask.astype(np.uint8))
             # Crop the corresponding region from the original image
             patch = image[y:y+h, x:x+w, :]
             patch = cv2.resize(patch, patch_size)
-            # if count < 50:
-            #     # print(np.nonzero(patch))
-            #     axs[count].imshow(patch)
-            #     axs[count].axis('off')
-            #     count += 1
-            # else:
-            #     plt.tight_layout()
-            #     plt.show()
             transformed_patch = transform(torch.Tensor(np.transpose(patch, axes=(-1, 0, 1)))).to(device)
 
             patches.append(transformed_patch)    
@@ -150,12 +159,13 @@ def divide_images_into_patches(images, targets_y, patch_size, device, mean_per_c
     patches = torch.stack(patches)
     targets = torch.Tensor(targets)
 
+
     return patches, targets
 
 
 def train(model, train_loader, optimizer, criterion, eval_metrics, device, 
           mean_per_ch, std_per_ch,
-          aug=False, 
+          aug=True, 
           patch=False,
           epoch=-1):
 
@@ -206,7 +216,7 @@ def train(model, train_loader, optimizer, criterion, eval_metrics, device,
             del stacked_X, stacked_y, X_aug, y_aug
 
         
-        print("After", np.unique(y.cpu().detach().numpy(), return_counts=True))
+        # print("After", np.unique(y.cpu().detach().numpy(), return_counts=True))
         X = X.requires_grad_()
         yhat = model(X)
         if not isinstance(yhat, torch.Tensor):
@@ -288,7 +298,7 @@ def test(model, test_loader, criterion, eval_metrics, device, mean_per_ch, std_p
             y = y.long()
             y_vectors = F.one_hot(y, 2)
             # print(yhat.size(), y.size(), y_vectors.size())
-            print("Test", np.unique(y.cpu().detach().numpy(), return_counts=True))
+            # print("Test", np.unique(y.cpu().detach().numpy(), return_counts=True))
             # print(y)
 
             loss = criterion(yhat, y)
