@@ -46,57 +46,56 @@ def extract_features(stacks, extractors=None, save=True, feature_dir="features/a
     # Get filenames
     fnames = np.array(stacks)[:, 2]
 
-    # Create a dictionary to save feature points related to that extractor.
-    dict_ = {"image": fnames, 'label': y}
+    # # Create a dictionary to save feature points related to that extractor.
+    # dict_ = {"image": fnames, 'label': y}
 
-    # Build up filename.
-    filename = feature_dir
-    df = pd.DataFrame.from_dict(dict_)
+    # # Build up filename.
+    # filename = feature_dir
+    # df = pd.DataFrame.from_dict(dict_)
 
     for extractor in extractors:
-        filename += str(extractor)
+        filename = feature_dir + "" + str(extractor) + "/"
 
         for j in tqdm(range(len(imgs))):
-            feature_values = extractor.describe(imgs[j])
+            feature_values = list(extractor.describe(imgs[j]))
             # Create a new DataFrame with the feature values
             # Filter and ignore performance warnings
             # warnings.filterwarnings("ignore")
-            column_labels = [f"{str(extractor)}_{i}" for i in range(1, 1+ len(feature_values))]
-            new_df = pd.DataFrame(columns=column_labels)
+            feature_values.append(y[j]) 
+            
+            filename = f'_{fnames[j]}.csv'
 
-            new_df.loc[0, column_labels] = feature_values
-            # Reset warning filters (if necessary)
-            # warnings.resetwarnings()
-            df = pd.concat([df, new_df], axis=1)
-    if save:
-        filename += '.csv'
-        df.to_csv(filename, index=False)
+            np.savetxt(filename, feature_values, delimiter=',')
 
-    return fnames, df
+    # if save:
+    #     filename += '.csv'
+    #     df.to_csv(filename, index=False)
+
+    return fnames
 
 
-def extract_imageLike(stacks, extractor=None, save=True, feature_dir="features/all/binary/100X/imageLike"):
-     """Extract image-like features from input images using specified feature extractors."""
+# def extract_imageLike(stacks, extractor=None, save=True, feature_dir="features/all/binary/100X/imageLike"):
+#      """Extract image-like features from input images using specified feature extractors."""
 
-     # Initialize target matrix.
-     y = np.array(stacks)[:, 1]
-     # Get images.
-     imgs = np.array(stacks)[:, 0]
+#      # Initialize target matrix.
+#      y = np.array(stacks)[:, 1]
+#      # Get images.
+#      imgs = np.array(stacks)[:, 0]
 
-     # Get filenames
-     fnames = np.array(stacks)[:, 2]
+#      # Get filenames
+#      fnames = np.array(stacks)[:, 2]
 
-     # Build up filename.
-     # df = pd.DataFrame.from_dict(dict_)
-     features = []
-     pkey = str(extractor) 
-     for j in tqdm(range(len(imgs))):
-         feature_values = extractor.describeImage(imgs[j])
-         features.append(feature_values)
-         label = 'benign' if y[j] == 0 else 'malignant'
-         path = feature_dir + f'/{pkey}/{label}/{fnames[j]}.png'
-         cv2.imwrite(path, feature_values)
-     return fnames, features
+#      # Build up filename.
+#      # df = pd.DataFrame.from_dict(dict_)
+#      features = []
+#      pkey = str(extractor) 
+#      for j in tqdm(range(len(imgs))):
+#          feature_values = extractor.describeImage(imgs[j])
+#          features.append(feature_values)
+#          label = 'benign' if y[j] == 0 else 'malignant'
+#          path = feature_dir + f'/{pkey}/{label}/{fnames[j]}.png'
+#          cv2.imwrite(path, feature_values)
+#      return fnames, features
 
 if __name__ == "__main__":
     extractors = [# LocalBinaryPatterns(8, 1), 
@@ -114,11 +113,11 @@ if __name__ == "__main__":
                   ]
 
     mf = '400X'
-    stack  = read_data(root='D:/BreaKHis_v1/', mf=mf, mode='binary',shuffle=False)
+    stack  = read_data(root="C:/Users/hadil/Documents/projects/Machine Learning/project/breast/", mf=mf, mode='binary',shuffle=False)
     if len(stack) == 0:
         print("Please change data dir!!")
         raise NotADirectoryError
     
-    fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/')
+    fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/wpd/')
 
     # fnames, fs = extract_imageLike(stack, extractor=extractors[0], save=True, feature_dir=f'D:/imageLike_features/{mf}/')
