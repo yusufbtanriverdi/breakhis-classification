@@ -53,7 +53,7 @@ class LPQ:
         return hist
     
     def __str__(self):
-        return 'lbq'
+        return 'lpq'
 
 if __name__ == "__main__":
     # Load image

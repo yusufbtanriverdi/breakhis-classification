@@ -1,15 +1,22 @@
-from typing import Any
 from torch.utils.data import Dataset
 import numpy as np
-
 import cv2
 import glob
 from tqdm import tqdm 
 import pandas as pd 
 import os
-from PIL import Image
 import matplotlib.pyplot as plt
 
+one_hot_vector_table = {
+    "adenosis": [1, 0, 0, 0, 0, 0, 0, 0], 
+    "fibroadenoma": [0, 1, 0, 0, 0, 0, 0, 0], 
+    "phyllodes_tumor": [0, 0, 1, 0, 0, 0, 0, 0], 
+    "tubular_adenoma": [0, 0, 0, 1, 0, 0, 0, 0], 
+    "ductal_carcinoma": [0, 0, 0, 0, 1, 0, 0, 0], 
+    "lobular_carcinoma": [0, 0, 0, 0, 0, 1, 0, 0], 
+    "mucinous_carcinoma": [0, 0, 0, 0, 0, 0, 1, 0], 
+    "papillary_carcinoma":  [0, 0, 0, 0, 0, 0, 0, 1]
+}
 
 def read_means_and_stds(mf):
     info_means = pd.read_csv('features\mean.csv', index_col='mf')    
@@ -38,14 +45,14 @@ def alter_name(fname):
     fname = fname.split('\\')[-1]
     return fname.split('.')[0]
     
-def read_images(path_arr, binary_label, multiclass_label = None, imsize=None):
+def read_images(path_arr, binary_label=None, multiclass_label = None, imsize=None):
     # Initialize variables
     min_width = float('inf')
     min_height = float('inf')
     resized_images = []
 
     # Iterate through all image files in directory
-    for filename in tqdm(path_arr, desc=f"{binary_label}_{multiclass_label}"):
+    for filename in tqdm(path_arr, desc=f"{multiclass_label}"):
         if filename.endswith('.png'): # or any other image format
             # Read image
             img = cv2.imread(filename)
@@ -75,7 +82,7 @@ def read_images(path_arr, binary_label, multiclass_label = None, imsize=None):
             if not multiclass_label:
                 resized_images.append((resized_img, binary_label, fname))
             else:
-                resized_images.append((resized_img, [binary_label, multiclass_label], fname))
+                resized_images.append((resized_img, one_hot_vector_table[multiclass_label], fname))
 
     return resized_images
 
@@ -119,19 +126,17 @@ def multiclass_paths(root, mf):
     papillary_carcinoma = root + f'malignant/*/papillary_carcinoma/*/{mf}/*.png'
 
     path_dict = {
-        "adenosis": (0, 0, glob.glob(adenosis)), 
-        "fibroadenoma": (0, 1, glob.glob(fibroadenoma)), 
-        "phyllodes_tumor": (0, 2, glob.glob(phyllodes_tumor)), 
-        "tubular_adenoma": (0, 3, glob.glob(tubular_adenoma)), 
-        "ductal_carcinoma": (1, 4, glob.glob(ductal_carcinoma)), 
-        "lobular_carcinoma": (1, 5, glob.glob(lobular_carcinoma)), 
-        "mucinous_carcinoma": (1, 6, glob.glob(mucinous_carcinoma)), 
-        "papillary_carcinoma": (1, 7, glob.glob(papillary_carcinoma))
+        "adenosis": glob.glob(adenosis), 
+        "fibroadenoma": glob.glob(fibroadenoma), 
+        "phyllodes_tumor": glob.glob(phyllodes_tumor), 
+        "tubular_adenoma": glob.glob(tubular_adenoma), 
+        "ductal_carcinoma": glob.glob(ductal_carcinoma), 
+        "lobular_carcinoma": glob.glob(lobular_carcinoma), 
+        "mucinous_carcinoma": glob.glob(mucinous_carcinoma), 
+        "papillary_carcinoma":  glob.glob(papillary_carcinoma)
     }
 
     return path_dict
-
-
 
 def make_weights_for_balanced_classes(pairs, nclasses):  
     # Source: https://discuss.pytorch.org/t/balanced-sampling-between-classes-with-torchvision-dataloader/2703/3                       

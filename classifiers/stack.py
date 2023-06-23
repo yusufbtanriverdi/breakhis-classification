@@ -20,8 +20,8 @@ def np_one_hot_encoder(y):
     v[np.arange(y.size), y] = 1
     return v
 
-def read_features(extractors, root='./features/all/', mode='binary', mf='40X'):
-    basedir = root + mode + '/' + mf + '/'
+def read_features(extractors, root='./features/all/', mf='40X'):
+    basedir = root + '/' + mf + '/stat/'
     X = []
     if len(extractors) == 1:
         featuredir = basedir + str(extractors[0]) + '.csv'
@@ -52,10 +52,13 @@ def read_data(root, mf, mode = 'binary', shuffle= True, imsize=None):
     elif mode == 'multiclass':
         paths_dict = multiclass_paths(root, mf)
 
-        stack = []
-        for key, (binary_label, multiclass_label, paths) in paths_dict.items():
-            current = read_images(paths, binary_label, imsize=imsize, multiclass_label=multiclass_label)
-            stack = np.append(stack, current)
+        
+        for key, paths in paths_dict.items():
+            current = read_images(path_arr = paths, imsize = imsize, multiclass_label = key)
+            try: 
+                stack = np.concatenate([stack, current])
+            except Exception as e:
+                stack = current
 
         if shuffle:
             np.random.shuffle(stack)

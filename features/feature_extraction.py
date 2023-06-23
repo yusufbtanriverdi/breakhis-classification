@@ -71,6 +71,9 @@ def extract_features(stacks, extractors=None, save=True, feature_dir="features/a
 
     return fnames
 
+def assign_multiclass_label_to_features():
+    # TODO: From fnames, we can assign labels as new column. 
+    pass
 
 # def extract_imageLike(stacks, extractor=None, save=True, feature_dir="features/all/binary/100X/imageLike"):
 #      """Extract image-like features from input images using specified feature extractors."""

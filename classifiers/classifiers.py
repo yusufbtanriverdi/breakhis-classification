@@ -7,8 +7,7 @@ sys.path.append(parent_dir)
 # print(sys.path)
 # Now we can import the tools module
 
-from stack import read_features, split_data
-from metrics import null_accuracy
+from stack import read_features, split_data, read_data
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,7 +22,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
-from sklearn.metrics import accuracy_score, roc_auc_score, average_precision_score, mean_absolute_percentage_error, f1_score, r2_score, cohen_kappa_score, recall_score
+from sklearn.metrics import accuracy_score, roc_auc_score, average_precision_score, f1_score, cohen_kappa_score, recall_score, log_loss
 from sklearn.metrics import make_scorer
 from sklearn.model_selection import cross_validate
 
@@ -79,13 +78,13 @@ QuadraticDiscriminantAnalysis(),
 
 cv_metrics = {
     'accuracy_score': make_scorer(accuracy_score),
-    'roc_auc_score': make_scorer(roc_auc_score),
+    'cross_entropy_loss': make_scorer(log_loss),
     'average_precision_score' : make_scorer(average_precision_score),
-    'mean_absolute_percentage_error' : make_scorer(mean_absolute_percentage_error),
+    'cohen_kappa_score' : make_scorer(cohen_kappa_score),
     'f1_score' : make_scorer(f1_score),
-    'r2_score' : make_scorer(r2_score),
-    'recall_Score' : make_scorer(recall_score),
-    'cohen_kappa_score' : make_scorer(cohen_kappa_score)
+    'recall_score' : make_scorer(recall_score),
+    'roc_auc_score': make_scorer(roc_auc_score),
+    'specificity_score' : make_scorer(recall_score, pos_label=0),
 }
 
 # TODO: Try with MNIST
@@ -112,7 +111,7 @@ def eval_classifiers(X, y, **kwargs):
         print(df)
     
     info = kwargs["info"]
-    filename = 'classifiers/results/40X/'
+    filename = f'classifiers/results/{info["mode"]}/{info["mf"]}/'
     for ex in info['extractors']:
         filename += ex
     
@@ -127,15 +126,27 @@ def eval_classifiers(X, y, **kwargs):
 if __name__ == "__main__":
     # Use here to test MNIST or other dataset.
     # FOS HAS MISSING VALUES!!!
+    extractors = ['glcm', 'hos','lbp', 'lpq', 'orb', 'wpd']
 
-    extractors = ['lbp', 'glcm', 'fos', 'hos', 'pftas', 'orb', 'lpq']
-    fnames, X, y = read_features(extractors, root='features/all/', mode='binary', mf='40X')
+    # Stack is throuple of image, multiclass/binary label, filename.
+    stack = read_data('../BreaKHis_v1/', '40X', mode = 'multiclass', shuffle=False, imsize=None)
 
-    # print(len(fnames), len(X), len(y))
+    fnames, X, y_binary = read_features(extractors, root='features/all/', mf='40X')
+
+    fnames = list(fnames)
+
+    # Get the indices where fnames == stack[:, -1]
+    indices = np.where(np.isin(stack[:, -1], fnames))
+
+    # Rearrange stack based on the indices
+    rearranged_stack = stack[indices]
+
+    # Assign stack[:, 1] as y_multiclass
+    y_multiclass = rearranged_stack[:, 1]
         
-    X_train, X_test, y_train, y_test = split_data(X, y, one_hot_vector=False, test_size=0.3)
+    X_train, X_test, y_train, y_test = split_data(X, y_multiclass, one_hot_vector=False, test_size=0.3)
     
     # print(X_test)
-    performance = eval_classifiers(X, y, info={'extractors': extractors,'mode': 'binary', 'mf': '40X'})
+    performance = eval_classifiers(X, y_binary, info={'extractors': extractors,'mode': 'multiclass', 'mf': '40X'})
     print(performance)
 
