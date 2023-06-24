@@ -195,7 +195,7 @@ if __name__ == '__main__':
 
 # binary
 
-# 40X -- fpcnv2, resnet18, googlenet, mnasnet, mobilenet (nonaug ------, aug--+-+)
+# 40X -- fpcnv2, resnet18, googlenet, mnasnet, mobilenet (nonaug ------, aug+++++)
 # 100X -- fpcnv2, resnet18, googlenet, mnasnet, mobilenet (nonaug ------, aug-----)
-# 200X -- fpcnv2, resnet18, googlenet, mnasnet, mobilenet (nonaug ------, aug-----)
+# 200X -- fpcnv2, resnet18, googlenet, mnasnet, mobilenet (nonaug ------, aug+++++)
 # 400X -- fpcnv2, resnet18, googlenet, mnasnet, mobilenet, (nonaug ------, aug-----)
