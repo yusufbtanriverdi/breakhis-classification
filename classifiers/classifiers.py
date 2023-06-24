@@ -10,47 +10,24 @@ sys.path.append(parent_dir)
 from stack import read_features, split_data, read_data
 
 import numpy as np
-import matplotlib.pyplot as plt
+from sklearn.kernel_ridge import KernelRidge
 from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import make_pipeline
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.gaussian_process.kernels import RBF
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, ExtraTreesClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis, LinearDiscriminantAnalysis
 from sklearn.metrics import accuracy_score, roc_auc_score, average_precision_score, f1_score, cohen_kappa_score, recall_score, log_loss
 from sklearn.metrics import make_scorer
+from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import cross_validate
 
 import pandas as pd
 from tqdm import tqdm
-
-"""# TODO: Try with MNIST
-# You can try to list parameters of classifier here.
-params = {"l1_regularization": 0.1}
-def eval_classifiers(train_X, train_y, test_X, test_y):
-    # Pseudo -code. Do not RUN yet.
-    # Example classifiers: https://scikit-learn.org/stable/auto_examples/classification/plot_classifier_comparison.html 
-    clfs = []
-    preds = []
-    for clf in clfs:
-        train_yhat = clf.fit(train_X)
-        preds.append(train_yhat)
-        # You can apply CV.
-        test_yhat = clf.predict(test_y)
-
-    # Use sklearn metrics AUC.
-    train_performance = auc(train_y, train_yhat)
-    test_performance = auc(test_y, test_yhat)
-    # You can create a table with pandas.
-
-    return  train_performance, test_performance
-"""
-
 import re
 
 def extract_text_between_parentheses(string):
@@ -62,17 +39,21 @@ def extract_text_between_parentheses(string):
     else:
         return None  # Return None if no match is found
 
+
 classifiers = [
+KernelRidge(alpha = 0.1),
+ExtraTreesClassifier(n_estimators=100, random_state=0),
+GaussianProcessClassifier(kernel=1.0 * RBF(1.0), random_state=0),
 KNeighborsClassifier(1),
 SVC(kernel="linear", C=1),
 SVC(gamma='auto', C=1),   
-# GaussianProcessClassifier(1.0 * RBF(1.0)),
 DecisionTreeClassifier(max_depth=20),
 RandomForestClassifier(max_depth=20, n_estimators=10, max_features=1),
 MLPClassifier(alpha=1, max_iter=1000),
 AdaBoostClassifier(),
 GaussianNB(),
 QuadraticDiscriminantAnalysis(),
+LinearDiscriminantAnalysis()
 ]
 
 

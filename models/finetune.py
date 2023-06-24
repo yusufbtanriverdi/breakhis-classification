@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch import optim
 from torchvision import transforms as T
 from torch.optim import lr_scheduler
-from torch.utils.data import Subset
+from torch.utils.data import Subset, WeightedRandomSampler
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import time
@@ -23,7 +23,7 @@ sys.path.append(parent_dir)
 from tools import BreaKHis, plot, read_means_and_stds
 
 
-def set_loaders(myDataset, seed=42, test_split=0.3, bs=16, test_weights=None):
+def set_loaders(myDataset, seed=42, test_split=0.3, bs=16, weights=None):
     
 
     # Assuming you have your dataset object named 'myDataset' and the desired test split ratio
@@ -52,21 +52,20 @@ def set_loaders(myDataset, seed=42, test_split=0.3, bs=16, test_weights=None):
     BATCH_SIZE = bs
     # For unbalanced dataset we create a weighted sampler                                                                                     
     # weights = torch.DoubleTensor(training_data.dataset.weight)                                       
-    # training_sampler = WeightedRandomSampler(weights, len(weights), replacement=False)                     
+    # training_sampler = WeightedRandomSampler(weights, len(weights), replacement=False)   
+    #     # Create weighted sampler
+                  
     train_loader = torch.utils.data.DataLoader(training_data, 
                                                batch_size=BATCH_SIZE, 
                                                pin_memory=False,
                                                shuffle = True,
-                                               num_workers=0
+                                               num_workers=0,
                                                )   
     
-    # weights = torch.DoubleTensor(test_data.dataset.weight)                                       
-    # test_sampler = WeightedRandomSampler(test_weights, BATCH_SIZE, replacement=True)   #  makes only one class:()
     test_loader = torch.utils.data.DataLoader(test_data, 
                                               batch_size=BATCH_SIZE, 
                                               pin_memory=False,
                                               num_workers=0,
-                                              # sampler = test_sampler
                                               )   
     
     print("Length of loaders and class distributions---> \n",
@@ -110,7 +109,7 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(device)
 
-    mf = '40X'
+    mf = '200X'
     mean_per_ch, std_per_ch = read_means_and_stds(mf = mf)
 
     print("Hello User! Dataset is loading....")
@@ -144,7 +143,7 @@ if __name__ == '__main__':
     seed=42, 
     test_split=0.3, 
     bs=32,
-    test_weights = class_weights)
+    weights = class_weights)
     
     del myDataset
 
@@ -192,7 +191,7 @@ if __name__ == '__main__':
                         weight_decay=0.001)
 
         # Annotation follows: magnification factor; augmentation method; pretrained, model type; optimizer type, learning rate; loss, parameters; batch size, sampling strategy; # of epochs
-        eval(model, test_loader, train_loader, optimizer, criterion, device, mean_per_ch, std_per_ch, patch=False ,num_epochs=100, mf=mf, model_name=f"40X_on-air-aug_std_none_pre-{model_name}_sgde-2e-4_bcew_32bs-strf_100ep")
+        eval(model, test_loader, train_loader, optimizer, criterion, device, mean_per_ch, std_per_ch, patch=False ,num_epochs=100, mf=mf, model_name=f"200X_on-air-aug_std_none_pre-{model_name}_sgde-2e-4_bcew_32bs-strf_100ep")
 
 # binary
 

@@ -176,12 +176,25 @@ def train(model, train_loader, optimizer, criterion, eval_metrics, device,
     if device != 'cpu':
         model = nn.DataParallel(model.to(device))
 
+    prev_y = None
+    prev_X = None
     for batch, (X, y) in enumerate(train_loader):
+
+        if prev_y and prev_X:
+            X = torch.concat((X, prev_X))
+            y = torch.concat((y, prev_y))
 
         optimizer.zero_grad()
 
         X = X.to(device)
         y = y.to(device)
+
+        if len(y) == 1: 
+            print("Only one element! End of batches.")
+            prev_y = y
+            prev_X = X
+            continue
+        
         # print("Before", np.unique(y.cpu().detach().numpy(), return_counts=True))
 
         if patch:
@@ -273,9 +286,24 @@ def test(model, test_loader, criterion, eval_metrics, device, mean_per_ch, std_p
     if device != 'cpu':
         model = nn.DataParallel(model)
 
-    for X, y in test_loader:
+    prev_y = None
+    prev_X = None
+    
+    for batch, (X, y) in enumerate(test_loader):
+
+        if prev_y and prev_X:
+            X = torch.concat((X, prev_X))
+            y = torch.concat((y, prev_y))
+
         X = X.to(device)
         y = y.to(device)
+
+        if len(y) == 1: 
+            print("Only one element! End of batches.")
+            prev_y = y
+            prev_X = X
+            continue
+
         if patch:
             # print("??????")
             patch_X, patch_y = divide_images_into_patches(X, y, (226, 226), device, mean_per_ch, std_per_ch)
