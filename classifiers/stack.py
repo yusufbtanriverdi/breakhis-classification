@@ -96,6 +96,5 @@ def split_data(X, y, one_hot_vector=False, test_size=0.3):
     if one_hot_vector:
         y = np_one_hot_encoder(y)
     # Return X_train, X_test, y_train, y_test.
-    # TODO: Test stratify.
     return train_test_split(X, y, test_size=test_size, shuffle=True, stratify=y)
 

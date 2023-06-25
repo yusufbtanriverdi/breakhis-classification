@@ -10,6 +10,7 @@ from extractors.hos import HOS
 from extractors.hog import HOG
 from extractors.superpixels import SuperpixelsEx
 from extractors.wpd import WPD
+from extractors.cnn import GoogleNet, ResNet18
 
 #from extractors.lbp import LocalBinaryPatterns
 #from extractors.glcm import GLCM
@@ -52,17 +53,12 @@ def extract_features(stacks, extractors=None, save=True, feature_dir="features/a
     # df = pd.DataFrame.from_dict(dict_)
 
     for extractor in extractors:
-        filename = feature_dir + str(extractor) + "/"
-
         for j in tqdm(range(len(imgs))):
             feature_values = list(extractor.describe(imgs[j]))
-            # Create a new DataFrame with the feature values
-            # Filter and ignore performance warnings
-            # warnings.filterwarnings("ignore")
             feature_values.append(y[j]) 
-            
-            filename = f'_{fnames[j]}.csv'
 
+            filename = feature_dir + str(extractor) + "/" + f'{fnames[j]}.csv'
+            # print(filename, len(feature_values))
             np.savetxt(filename, feature_values, delimiter=',')
 
     # if save:
@@ -99,6 +95,8 @@ def assign_multiclass_label_to_features():
 #      return fnames, features
 
 if __name__ == "__main__":
+    
+    mf = '40X'
     extractors = [# LocalBinaryPatterns(8, 1), 
                   # LPQ(radius=3, neighbors=8, block_size=3),
                   # GLCM(distances=[1], angles=[0, np.pi/4, np.pi/2, 3*np.pi/4], levels=256),
@@ -110,15 +108,15 @@ if __name__ == "__main__":
                   # SuperpixelsEx(),
                   HOG(),
                   # WPD(),
+                  # ResNet18(num_classes=2, mf=mf, weights="models/results/40X/weights/40X_on-air-aug_std_none_pre-resnet18_sgde-2e-4_bcew_32bs-strf_100ep_2023-06-23.pth"),
+                  # GoogleNet(num_classes=2, mf=mf, weights="models/results/40X/weights/40X_on-air-aug_std_none_pre-googlenet_sgde-2e-4_bcew_32bs-strf_100ep_2023-06-23.pth"),
                   ]
 
-    mf = '40X'
     stack  = read_data(root='../BreaKHis_v1/', mf=mf, mode='binary', shuffle=False)
     if len(stack) == 0:
         print("Please change data dir!!")
         raise NotADirectoryError
-    print(stack)
     
-    fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/binary/{mf}/stat/')
+    fnames, df = extract_features(stack, extractors=extractors, save=True, feature_dir=f'features/all/{mf}/stat/')
 
     # fnames, fs = extract_imageLike(stack, extractor=extractors[0], save=True, feature_dir=f'D:/imageLike_features/{mf}/')

@@ -2,7 +2,8 @@ import os
 import numpy as np
 import pandas as pd
 
-folder_path = './features/all/binary/400X/wpd/'
+key = 'resnet18'
+folder_path = f'./features/all/40X/stat/{key}/'
 
 # Count the number of csv files in the folder
 number_of_images = sum(1 for file_name in os.listdir(folder_path) if file_name.endswith('.csv'))
@@ -32,7 +33,7 @@ feature_matrix = feature_matrix[:, :-1]
 from sklearn.feature_selection import SelectKBest, f_regression
 
 # Set the desired number of features to keep
-num_features_to_keep = 51
+num_features_to_keep = 1000
 
 # Perform feature selection using SelectKBest and f_regression
 selector = SelectKBest(score_func=f_regression, k=num_features_to_keep)
@@ -50,7 +51,7 @@ print(selected_feature_matrix.shape)
 selected_df = pd.DataFrame(selected_feature_matrix, index=image_names)
 
 # Create a DataFrame with selected features and image names as columns
-column_headers = ["wpd_" + str(i) for i in range(selected_feature_matrix.shape[1])]
+column_headers = [f"{key}" + str(i) for i in range(selected_feature_matrix.shape[1])]
 column_headers = ["image"] + ["label"] + column_headers
 
 # Create a DataFrame with selected features and image names as columns
@@ -69,4 +70,4 @@ selected_df["label"] = target_var
 selected_df = selected_df.iloc[:, :-1]
 
 # Save the DataFrame to a CSV file
-selected_df.to_csv('wpd_400X.csv', index=False)
+selected_df.to_csv(f'{key}.csv', index=False)

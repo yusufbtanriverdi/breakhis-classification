@@ -213,20 +213,23 @@ def train(model, train_loader, optimizer, criterion, eval_metrics, device,
 
         # Apply on-the-fly augmentation to obtain augmented data and labels
         if aug:
-            X_aug, y_aug = apply_on_air_augmentation(X, y, n=int(len(y)/3))
+            if len(torch.unique(y)) != 1:
+                X_aug, y_aug = apply_on_air_augmentation(X, y, n=int(len(y)/3))
 
-            X_aug = X_aug.to(device)
-            y_aug = y_aug.to(device)
-            # Stack original and augmented data
-            stacked_X = torch.cat((X, X_aug))
-            stacked_y = torch.cat((y, y_aug))
+                X_aug = X_aug.to(device)
+                y_aug = y_aug.to(device)
+                # Stack original and augmented data
+                stacked_X = torch.cat((X, X_aug))
+                stacked_y = torch.cat((y, y_aug))
 
-            # Shuffle the stacked data and labels
-            indices = torch.randperm(stacked_X.size(0))
-            X = stacked_X[indices]
-            y = stacked_y[indices]
+                # Shuffle the stacked data and labels
+                indices = torch.randperm(stacked_X.size(0))
+                X = stacked_X[indices]
+                y = stacked_y[indices]
 
-            del stacked_X, stacked_y, X_aug, y_aug
+                del stacked_X, stacked_y, X_aug, y_aug
+            else:
+                print("Only one class exists in y. no augmentation will be done.")
 
         
         # print("After", np.unique(y.cpu().detach().numpy(), return_counts=True))
@@ -416,7 +419,7 @@ def eval(model, test_loader, train_loader, optimizer, criterion, device, mean_pe
 
     for metric, title in m_titles.items():
         visualize.visualize_metrics(train_data=train_df, test_data=test_df, 
-                                path=f'models/results/40X/figs/{model_name}_{date_string}_{metric}.png',
+                                path=f'models/results/{mf}/figs/{model_name}_{date_string}_{metric}.png',
                                 metric=metric,
                                 title=title)
     print(model_name, "Done!")
