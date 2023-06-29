@@ -1,8 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from torchmetrics import Accuracy, Recall, AveragePrecision, AUROC, MeanAbsolutePercentageError, F1Score, R2Score, CohenKappa
-import os 
 
 def plot_epochs(train_data, test_data, epochs_lim=100, metric='Average Loss'):
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -60,39 +58,39 @@ def compare_models(scores_per_model, path=None, epochs_lim=100, metric= 'Average
 
 if __name__ == '__main__':
     # Read train and test data from CSV files
-    # train_data = pd.read_csv('models/results/400X/train/400X_on-air-aug_std_weightrandom_pre-mnasnet_sgde-2e-4_bcew_32bs-strf_100ep_2023-06-25.csv')
-    # test_data = pd.read_csv('models/results/400X/test/400X_on-air-aug_std_weightrandom_pre-mnasnet_sgde-2e-4_bcew_32bs-strf_100ep_2023-06-25.csv')
+    train_data = pd.read_csv('models/results/100X/train/100X_on-air-aug_std_weightrandom_pre-fpcnv2_sgde-2e-4_bcew_32bs-strf_100ep_2023-06-25.csv')
+    test_data = pd.read_csv('models/results/100X/test/100X_on-air-aug_std_weightrandom_pre-fpcnv2_sgde-2e-4_bcew_32bs-strf_100ep_2023-06-25.csv')
 
-    # m_titles = {
-    # 'accuracy_score': 'Accuracy',
-    # 'roc_auc_score': 'ROC AUC',
-    # 'average_precision_score' : 'Average Precision',
-    # 'f1_score' : 'F1 Score',
-    # 'recall_Score' : 'Recall',
-    # 'cohen_kappa_score' : 'Cohen-Kappa Score',
-    # 'specificity_score': 'Specificity'
-    # }
+    m_titles = {
+    'accuracy_score': 'Accuracy',
+    'roc_auc_score': 'ROC AUC',
+    'average_precision_score' : 'Average Precision',
+    'f1_score' : 'F1 Score',
+    'recall_Score' : 'Recall',
+    'cohen_kappa_score' : 'Cohen-Kappa Score',
+    'specificity_score': 'Specificity'
+    }
 
-    # for metric, title in m_titles.items():
-    #     visualize_metrics(train_data=train_data, test_data=test_data, 
-    #                             path=f'models/results/400X/figs/400X_on-air-aug_std_weightrandom_pre-mnasnet_sgde-2e-4_bcew_32bs-strf_100ep_2023-06-25_{metric}.png',
-    #                             metric=metric,
-    #                             title=title)
+    for metric, title in m_titles.items():
+        visualize_metrics(train_data=train_data, test_data=test_data, 
+                                path=f'models/results/100X/figs/100X_on-air-aug_std_weightrandom_pre-fpcnv2_sgde-2e-4_bcew_32bs-strf_100ep_2023-06-25_{metric}.png',
+                                metric=metric,
+                                title=title)
 
     # plt.show()
 
 
-    path = 'models/results/200X/test'
-    files = os.listdir(path)
-    scores_per_model = []
+    # path = 'models/results/200X/test'
+    # files = os.listdir(path)
+    # scores_per_model = []
 
-    colors = ['blue', 'red', 'green', 'pink', 'orange']
-    labels = ['FPN', 'GoogleNet', 'MnasNet', 'MobileNet', 'Resnet18']
+    # colors = ['blue', 'red', 'green', 'pink', 'orange']
+    # labels = ['FPN', 'GoogleNet', 'MnasNet', 'MobileNet', 'Resnet18']
 
-    for i, file in enumerate(files):
-        print(file)
-        data = pd.read_csv(os.path.join(path, file))
-        scores_per_model.append((data, labels[i], colors[i]))
+    # for i, file in enumerate(files):
+    #     print(file)
+    #     data = pd.read_csv(os.path.join(path, file))
+    #     scores_per_model.append((data, labels[i], colors[i]))
 
-    compare_models(scores_per_model, metric='specificity_score', title='Specificity',
-                   path= 'models/results/200X/figs/200X_test_comparison_specificity_score.png')
+    # compare_models(scores_per_model, metric='specificity_score', title='Specificity',
+    #                path= 'models/results/200X/figs/200X_test_comparison_specificity_score.png')
