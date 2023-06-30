@@ -2,8 +2,9 @@ import os
 import numpy as np
 import pandas as pd
 
-key = 'resnet18'
-folder_path = f'./features/all/40X/stat/{key}/'
+key = 'hog'
+mf = '100X'
+folder_path = f'./features/all/{mf}/stat/{key}/'
 
 # Count the number of csv files in the folder
 number_of_images = sum(1 for file_name in os.listdir(folder_path) if file_name.endswith('.csv'))

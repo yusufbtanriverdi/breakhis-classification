@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os 
+import numpy as np
 
 def plot_epochs(train_data, test_data, epochs_lim=100, metric='Average Loss'):
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -40,10 +42,18 @@ def compare_models(scores_per_model, path=None, epochs_lim=100, metric= 'Average
     fig, ax = plt.subplots(figsize=(10, 6))
 
     for data, label, color in scores_per_model:
+        # Find the index of the maximum value in y
+        max_x = np.argmax(data[metric])
+        max_y = np.max(data[metric])
 
         melted_data = data.melt(id_vars='Epoch', value_vars=metric, var_name='Metric', value_name='Value')
         
         sns.lineplot(data=melted_data[:epochs_lim], x='Epoch', y='Value', ax=ax, label=label, color=color)
+        # Add a marker at the maximum point
+        # plt.scatter(max_x, max_y, color='black', s=10)
+        # plt.text(max_x, max_y, str(round(max_y, 2)), color=color,  ha='center', va='bottom')
+
+
     
     ax.set_xlabel('Epoch')
     ax.set_ylabel(f'{title}')
@@ -58,39 +68,50 @@ def compare_models(scores_per_model, path=None, epochs_lim=100, metric= 'Average
 
 if __name__ == '__main__':
     # Read train and test data from CSV files
-    train_data = pd.read_csv('models/results/100X/train/100X_on-air-aug_std_weightrandom_pre-fpcnv2_sgde-2e-4_bcew_32bs-strf_100ep_2023-06-25.csv')
-    test_data = pd.read_csv('models/results/100X/test/100X_on-air-aug_std_weightrandom_pre-fpcnv2_sgde-2e-4_bcew_32bs-strf_100ep_2023-06-25.csv')
+    # train_data = pd.read_csv('models/results/100X/train/100X_on-air-aug_std_weightrandom_pre-fpcnv2_sgde-2e-4_bcew_32bs-strf_100ep_2023-06-25.csv')
+    # test_data = pd.read_csv('models/results/100X/test/100X_on-air-aug_std_weightrandom_pre-fpcnv2_sgde-2e-4_bcew_32bs-strf_100ep_2023-06-25.csv')
 
-    m_titles = {
-    'accuracy_score': 'Accuracy',
-    'roc_auc_score': 'ROC AUC',
-    'average_precision_score' : 'Average Precision',
-    'f1_score' : 'F1 Score',
-    'recall_Score' : 'Recall',
-    'cohen_kappa_score' : 'Cohen-Kappa Score',
-    'specificity_score': 'Specificity'
-    }
+    # m_titles = {
+    # 'accuracy_score': 'Accuracy',
+    # 'roc_auc_score': 'ROC AUC',
+    # 'average_precision_score' : 'Average Precision',
+    # 'f1_score' : 'F1 Score',
+    # 'recall_Score' : 'Recall',
+    # 'cohen_kappa_score' : 'Cohen-Kappa Score',
+    # 'specificity_score': 'Specificity'
+    # }
 
-    for metric, title in m_titles.items():
-        visualize_metrics(train_data=train_data, test_data=test_data, 
-                                path=f'models/results/100X/figs/100X_on-air-aug_std_weightrandom_pre-fpcnv2_sgde-2e-4_bcew_32bs-strf_100ep_2023-06-25_{metric}.png',
-                                metric=metric,
-                                title=title)
+    # for metric, title in m_titles.items():
+    #     visualize_metrics(train_data=train_data, test_data=test_data, 
+    #                             path=f'models/results/100X/figs/100X_on-air-aug_std_weightrandom_pre-fpcnv2_sgde-2e-4_bcew_32bs-strf_100ep_2023-06-25_{metric}.png',
+    #                             metric=metric,
+    #                             title=title)
 
     # plt.show()
 
 
-    # path = 'models/results/200X/test'
-    # files = os.listdir(path)
-    # scores_per_model = []
+    path = 'models/results/40X/test'
+    files = os.listdir(path)
+        # 1- models\results\40X\weights\40X_on-air-aug_std_none_pre-resnet18_sgde-2e-4_bcew_32bs-strf_100ep_2023-06-23.pth
+    # 2- models\arch_results\40X\weights\40X_none_std_none_pre-resnet18_sgde-2_bce_32bs-strf_100ep_2023-06-19.pth
+    # 3- models\arch_results\40X\weights\40X_on-air-sp_std_none_pre-resnet18_sgde-2_bce_32bs-strf_100ep_2023-06-16.pth
 
-    # colors = ['blue', 'red', 'green', 'pink', 'orange']
-    # labels = ['FPN', 'GoogleNet', 'MnasNet', 'MobileNet', 'Resnet18']
+    # files = ["models/arch_results/40X/test/40X_none_std_none_pre-resnet18_sgde-2_bce_32bs-strf_100ep_2023-06-19.csv",
+    # "models/arch_results/40X/test/40X_on-air-sp_std_none_pre-resnet18_sgde-2_bce_32bs-strf_100ep_2023-06-16.csv",
+    # "models/results/40X/test/40X_on-air-aug_std_none_pre-resnet18_sgde-2e-4_bcew_32bs-strf_100ep_2023-06-23.csv"]
+    scores_per_model = []
 
-    # for i, file in enumerate(files):
-    #     print(file)
-    #     data = pd.read_csv(os.path.join(path, file))
-    #     scores_per_model.append((data, labels[i], colors[i]))
+    # colors = ['green', 'red', 'blue']
+    # labels = ['No Augmentation-Patching', '4-Tile Patching', 'Augmentation']
 
-    # compare_models(scores_per_model, metric='specificity_score', title='Specificity',
-    #                path= 'models/results/200X/figs/200X_test_comparison_specificity_score.png')
+    colors = ['green', 'red', 'blue', 'purple', 'orange']
+    labels = ['FPN', 'GoogleNet', 'MnasNet', 'MobileNet', 'Resnet18']
+
+    for i, file in enumerate(files):
+        print(file)
+        data = pd.read_csv(os.path.join(path,file))
+        scores_per_model.append((data, labels[i], colors[i]))
+
+    compare_models(scores_per_model, metric='accuracy_score', title='Accuracy',
+                   path= 'models/results/40X/figs/40X_max_acc.png')
+

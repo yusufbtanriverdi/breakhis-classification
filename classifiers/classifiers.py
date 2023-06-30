@@ -56,32 +56,33 @@ def extract_text_between_parentheses(string):
         return None  # Return None if no match is found
 
 classifiers = [
+                # LogisticRegression(solver='saga', penalty='elasticnet', l1_ratio=0.5, max_iter=200),
+                LogisticRegression(solver='liblinear', penalty='l1'),
+                LogisticRegression(penalty='l2', max_iter=200),
+                ExtraTreesClassifier(criterion='entropy', n_estimators=100, random_state=0),
+                # GaussianProcessClassifier(kernel=1.0 * RBF(1.0), random_state=0),
+                KNeighborsClassifier(1),
+                # SVC(kernel="linear", C=1),
+                # SVC(gamma='auto', C=1),   
+                DecisionTreeClassifier(criterion='entropy', max_depth=20),
+                RandomForestClassifier(criterion='entropy', max_depth=20, n_estimators=10, max_features=1),
                 BernoulliNB(),
                 # OneClassSVM(),
                 SGDClassifier(),
-                RidgeClassifier(),
+                RidgeClassifier(solver='lsqr'),
                 PassiveAggressiveClassifier(),
                 # GradientBoostingClassifier(),
                 # RadiusNeighborsClassifier(),
                 # Lasso(),
                 # LinearSVC(),
-                LogisticRegression(),
                 # ElasticNet(),
                 # BayesianRidge(),
                 NearestCentroid(),
                 # KernelRidge(alpha = 0.1),
                 # NuSVC(),
-                ExtraTreesClassifier(n_estimators=100, random_state=0),
-                # GaussianProcessClassifier(kernel=1.0 * RBF(1.0), random_state=0),
-                KNeighborsClassifier(1),
-                # SVC(kernel="linear", C=1),
-                # SVC(gamma='auto', C=1),   
-                DecisionTreeClassifier(max_depth=20),
-                RandomForestClassifier(max_depth=20, n_estimators=10, max_features=1),
-                MLPClassifier(alpha=1, max_iter=1000),
-                AdaBoostClassifier(),
+                # MLPClassifier(alpha=1, max_iter=1000),
+                # AdaBoostClassifier(),
                 GaussianNB(),
-                QuadraticDiscriminantAnalysis(),
                 LinearDiscriminantAnalysis(),
                 # GaussianMixture()
             ]
@@ -105,7 +106,6 @@ cv_metrics = {
     'average_precision_score' : make_scorer(average_precision_score, average='weighted'),
     'cohen_kappa_score' : make_scorer(cohen_kappa_score),
     'f1_score' : make_scorer(f1_score, average='weighted'),
-    # 'precision_score' : make_scorer(precision_score, average='weighted'),
     'recall_score' : make_scorer(recall_score, average='weighted'),
     'roc_auc_score': make_scorer(roc_auc_score, average='weighted'),
     'specificity_score' : make_scorer(recall_score, pos_label=0, average='binary'),
@@ -118,6 +118,7 @@ def eval_classifiers(X, y, **kwargs):
     # Example classifiers: https://scikit-learn.org/stable/auto_examples/classification/plot_classifier_comparison.html 
     # Define the list of scoring metrics
     df = pd.DataFrame()
+    df_std = pd.DataFrame()
     
     for i, clf in tqdm(enumerate(classifiers), desc="Classifiers are running...."):
         # ax = plt.subplot(len(classifiers) + 1, i)
@@ -133,8 +134,7 @@ def eval_classifiers(X, y, **kwargs):
         # Use sklearn metrics AUC.
         for j, key in enumerate(cv_scores.keys()):
             df.loc[clf_key, key] = np.mean(cv_scores[key])
-
-        print(df)
+            df_std.loc[clf_key, key] = np.std(cv_scores[key])
     
     info = kwargs["info"]
     filename = f'classifiers/results/{info["mode"]}/{info["mf"]}/'
@@ -147,39 +147,40 @@ def eval_classifiers(X, y, **kwargs):
     filename += '.csv'
 
     df.to_csv(filename)
-    return  df
+    df_std.to_csv("40X_std.csv")
+    return df
 
 if __name__ == "__main__":
-    # Use here to test MNIST or other dataset.
-    # FOS HAS MISSING VALUES!!!
-    extractors = ['glcm', 'hos','lbp', 'lpq', 'orb', 'wpd', 'resnet18', 'googlenet']
+
+    mf = '100X'
+    extractors = ['glcm', 'hos','lbp', 'lpq', 'orb', 'wpd', 'hog', 'resnet18', 'googlenet']
 
     # Stack is throuple of image, multiclass/binary label, filename.
-    stack = read_data('../BreaKHis_v1/', '40X', mode = 'multiclass', shuffle=True, imsize=None)
+    # stack = read_data('../BreaKHis_v1/', '40X', mode = 'multiclass', shuffle=True, imsize=None)
 
-    fnames, X, y_binary = read_features(extractors, root='features/all/', mf='40X')
+    fnames, X, y_binary = read_features(extractors, root='features/all/', mf=mf)
 
     fnames = list(fnames)
 
     # Get the indices where fnames == stack[:, -1]
-    indices = np.where(np.isin(stack[:, -1], fnames))
+    # indices = np.where(np.isin(stack[:, -1], fnames))
 
-    # Filter indices based on y_binary == 0
-    filtered_indices = indices[0][y_binary[indices[0]] == 0]
+    # # Filter indices based on y_binary == 0
+    # filtered_indices = indices[0][y_binary[indices[0]] == 0]
 
-    X_negative = X[y_binary[indices[0]] == 0]
-    # Rearrange stack based on the filtered indices
-    rearranged_stack = stack[filtered_indices]
+    # X_negative = X[y_binary[indices[0]] == 0]
+    # # Rearrange stack based on the filtered indices
+    # rearranged_stack = stack[filtered_indices]
 
-    # Assign stack[:, 1] as y_multiclass
-    y_negative_multiclass = rearranged_stack[:, 1]
+    # # Assign stack[:, 1] as y_multiclass
+    # y_negative_multiclass = rearranged_stack[:, 1]
 
-    # print(y_negative_multiclass)
-    # y_multiclass = [np.argmax(y) for y in y_multiclass]
-    y_multiclass_ohv = [np.array(y) for y in y_negative_multiclass]
-    y_multiclass_num = [np.argmax(y) for y in y_negative_multiclass]
+    # # print(y_negative_multiclass)
+    # # y_multiclass = [np.argmax(y) for y in y_multiclass]
+    # y_multiclass_ohv = [np.array(y) for y in y_negative_multiclass]
+    # y_multiclass_num = [np.argmax(y) for y in y_negative_multiclass]
 
-    # X_train, X_test, y_train, y_test = split_data(X, y_multiclass, one_hot_vector=False, test_size=0.3)
-    performance = eval_classifiers(X, y_binary, info={'extractors': extractors,'mode': 'binary', 'mf': '40X'})
+    # # X_train, X_test, y_train, y_test = split_data(X, y_multiclass, one_hot_vector=False, test_size=0.3)
+    performance = eval_classifiers(X, y_binary, info={'extractors': extractors,'mode': 'binary', 'mf': mf})
     # print(performance)
 

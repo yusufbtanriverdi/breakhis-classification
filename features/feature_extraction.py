@@ -96,7 +96,7 @@ def assign_multiclass_label_to_features():
 
 if __name__ == "__main__":
     
-    mf = '40X'
+    mf = '100X'
     extractors = [# LocalBinaryPatterns(8, 1), 
                   # LPQ(radius=3, neighbors=8, block_size=3),
                   # GLCM(distances=[1], angles=[0, np.pi/4, np.pi/2, 3*np.pi/4], levels=256),
