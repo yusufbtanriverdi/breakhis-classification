@@ -2,9 +2,9 @@
 
 We try to achieve state-of-art results with the BreakHist dataset! Considering non-reported specificity or ROC-AUC metrics in literature, we aim to achieve a good (less) false positive rate! We use pre-trained and finetuned mobile networks, such as the Resnet family or MobileNet itself.
 
-### We published our first draft of the work! Congratulations to my dear team members!
+### We published (inaccessibly) our first draft of the work! Congratulations to my dear team members!
 
-You can reach our report on my website, [here!](https://yusuftengriverdi.github.io).
+Soon, you can reach our report on my website, [here!](https://yusuftengriverdi.github.io).
 
 ### Future Discussions:
 
